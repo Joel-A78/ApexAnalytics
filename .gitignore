@@ -1,0 +1,15 @@
+﻿.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.ff1pkl
+*.sqlite
+.data/
+streamlit-cache/
+.env
+.DS_Store
+
+# project data
+/data/raw/
+/data/processed/

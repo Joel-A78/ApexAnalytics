@@ -7,7 +7,7 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from src.categories import CATEGORIES, get_category
+from src.plant_categories import CATEGORIES, get_category
 
 st.set_page_config(
     page_title="Plant Performance Intelligence",
@@ -92,7 +92,7 @@ def compute_kpis(df: pd.DataFrame) -> dict[str, float]:
 sample_data = build_sample_plant_data()
 
 with st.sidebar:
-    st.markdown("### 🏭 Área funcional")
+    st.markdown("### ▸ Área funcional")
     available_categories = [c for c in CATEGORIES if c.status == "available"]
     selected_id = st.radio(
         "Selecciona una vista",
@@ -116,10 +116,10 @@ st.markdown(
 
 summary_tab, quality_tab, inventory_tab, maintenance_tab = st.tabs(
     [
-        "📊 Resumen general",
-        "✅ Calidad y scrap",
-        "📦 Inventario y OTIF",
-        "🛠️ Mantenimiento y paros",
+        "▼ Resumen general",
+        "✓ Calidad y scrap",
+        "◆ Inventario y OTIF",
+        "⚙ Mantenimiento y paros",
     ]
 )
 

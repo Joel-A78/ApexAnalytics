@@ -37,7 +37,7 @@ CATEGORIES: list[PlantCategory] = [
     PlantCategory(
         id="maintenance",
         label="Mantenimiento y paros",
-        icon="🛠️",
+        icon="⚙",
         status="available",
         description="Disponibilidad, MTBF, MTTR y minutos perdidos por máquina o línea.",
     ),

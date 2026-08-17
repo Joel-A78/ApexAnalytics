@@ -1,4 +1,4 @@
-# � Automobile SupplierPerformance Intelligence
+# � Automobile Supplier Performance Intelligence
 
 Proyecto de análisis de datos para una planta proveedora automotriz ubicada en Tijuana, Baja California, que exporta componentes a Estados Unidos. El objetivo es transformar datos operativos en información útil para mejorar la eficiencia, la calidad, la confiabilidad del proceso y la entrega a clientes.
 

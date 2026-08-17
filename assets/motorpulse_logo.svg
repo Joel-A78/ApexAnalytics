@@ -1,0 +1,43 @@
+<svg viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <!-- Engranaje -->
+  <g transform="translate(20, 30)">
+    <circle cx="0" cy="0" r="12" fill="none" stroke="#0096FF" stroke-width="1.5"/>
+    <g stroke="#0096FF" stroke-width="1.5" fill="none">
+      <rect x="-2" y="-14" width="4" height="4"/>
+      <rect x="-2" y="10" width="4" height="4"/>
+      <rect x="-14" y="-2" width="4" height="4"/>
+      <rect x="10" y="-2" width="4" height="4"/>
+      <rect x="-10" y="-10" width="3" height="3"/>
+      <rect x="7" y="-10" width="3" height="3"/>
+      <rect x="-10" y="7" width="3" height="3"/>
+      <rect x="7" y="7" width="3" height="3"/>
+    </g>
+  </g>
+
+  <!-- Pulso / Línea vital -->
+  <g transform="translate(0, 30)">
+    <polyline points="35,10 40,10 42,5 44,15 47,8 50,15 52,10 55,10" 
+              fill="none" stroke="#00FF7F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Coche simplificado -->
+  <g transform="translate(60, 22)">
+    <rect x="0" y="8" width="20" height="8" rx="1" fill="none" stroke="#0096FF" stroke-width="1.5"/>
+    <polygon points="4,8 6,4 14,4 16,8" fill="none" stroke="#0096FF" stroke-width="1.5"/>
+    <circle cx="5" cy="16" r="2" fill="#00FF7F"/>
+    <circle cx="15" cy="16" r="2" fill="#00FF7F"/>
+    <rect x="7" y="7" width="6" height="3" fill="none" stroke="#00D9FF" stroke-width="1"/>
+  </g>
+
+  <!-- Escudo de calidad/seguridad -->
+  <g transform="translate(140, 18)">
+    <path d="M 10 0 L 18 4 L 18 12 Q 10 18 10 18 Q 2 12 2 4 Z" 
+          fill="none" stroke="#00FF7F" stroke-width="1.5"/>
+    <path d="M 6 10 L 9 13 L 14 8" 
+          fill="none" stroke="#00FF7F" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Texto: Motorpulse -->
+  <text x="10" y="52" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#00274D">Motor</text>
+  <text x="60" y="52" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#0096FF">pulse</text>
+</svg>

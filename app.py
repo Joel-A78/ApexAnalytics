@@ -91,6 +91,17 @@ def compute_kpis(df: pd.DataFrame) -> dict[str, float]:
 sample_data = build_sample_plant_data()
 
 with st.sidebar:
+    # Logo y título de Motorpulse
+    col1, col2 = st.columns([0.25, 0.75])
+    with col1:
+        st.image("assets/motorpulse_logo.svg", width=50)
+    with col2:
+        st.markdown(
+            "<h2 style='color: #0096FF; margin: 0; padding-top: 0.5rem;'>Motorpulse</h2>",
+            unsafe_allow_html=True
+        )
+    st.markdown("---")
+    
     st.markdown("### ▸ Área funcional")
     available_categories = [c for c in CATEGORIES if c.status == "available"]
     selected_id = st.radio(
@@ -104,10 +115,10 @@ active = get_category(selected_id)
 
 st.markdown(
     f"""
-    <div style="padding: 1rem 1rem 1rem 0; border-bottom: 1px solid #2a3f5f; margin-bottom: 1rem;">
-        <div style="font-size:2.2rem;">{active.icon}</div>
-        <h1 style="margin: 0.2rem 0;">{active.label}</h1>
-        <p style="margin: 0; color: #cfe2ff;">{active.description}</p>
+    <div style="padding: 1.5rem; border-left: 4px solid #0096FF; background: linear-gradient(90deg, #003D7A 0%, #00274D 100%); border-radius: 8px; margin-bottom: 1.5rem;">
+        <div style="font-size: 2.2rem; color: #00FF7F; margin-bottom: 0.5rem;">{active.icon}</div>
+        <h1 style="margin: 0.2rem 0; color: #FFFFFF; font-size: 2rem;">{active.label}</h1>
+        <p style="margin: 0; color: #00D9FF; font-size: 0.95rem;">{active.description}</p>
     </div>
     """,
     unsafe_allow_html=True,

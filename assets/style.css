@@ -1,28 +1,27 @@
 /* assets/style.css
-   Tema visual del dashboard: negro puro como color principal (estilo
-   "pit wall" / telemetría nocturna), con una paleta de acentos limitada
-   y consistente para que cada color signifique siempre lo mismo:
-
-   - Rojo de marca (--accent-primary): elementos activos / identidad visual
-   - Verde: reglamentario / válido
-   - Rojo alerta: no reglamentario / inválido
-   - Ámbar: próximamente / pendiente
-   - Azul: informativo / selección activa
+   Tema visual Motorpulse: paleta basada en el logo automotriz
+   
+   - Azul oscuro (--pit-bg): color de fondo profesional
+   - Azul brillante (--accent-primary): elementos activos e identidad
+   - Cyan/Verde (--accent-green): estados positivos, datos válidos
+   - Rojo alerta: estados críticos
+   - Ámbar: estados pendientes/advertencia
+   - Azul informativo: datos secundarios
 */
 
 :root {
-    --pit-bg: #000000;
-    --pit-panel: #0d0d0d;
-    --pit-panel-alt: #141414;
-    --pit-border: #262626;
-    --pit-text: #e6e6e6;
-    --pit-muted: #8a8f98;
+    --pit-bg: #00274D;           /* azul oscuro principal */
+    --pit-panel: #003D7A;        /* azul más claro para paneles */
+    --pit-panel-alt: #001F3F;    /* azul aún más oscuro para contraste */
+    --pit-border: #0074D9;       /* borde azul brillante */
+    --pit-text: #FFFFFF;         /* texto blanco */
+    --pit-muted: #A0A0A0;        /* texto mutado */
 
-    --accent-primary: #e10600;   /* rojo de marca, acentos y elementos activos */
-    --accent-green: #2ca02c;     /* reglamentario / válido */
-    --accent-red: #ef4444;       /* no reglamentario / inválido */
-    --accent-amber: #e6a417;     /* próximamente / pendiente */
-    --accent-blue: #3b82f6;      /* informativo / selección */
+    --accent-primary: #0096FF;   /* azul brillante: elementos activos, Motorpulse identity */
+    --accent-green: #00FF7F;     /* verde/cyan brillante: válido, positivo */
+    --accent-red: #FF3B3B;       /* rojo: crítico, alerta */
+    --accent-amber: #FFB800;     /* ámbar: pendiente, advertencia */
+    --accent-blue: #00D9FF;      /* cyan: informativo, datos secundarios */
 }
 
 /* Fondo general de la app */

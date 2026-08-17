@@ -249,14 +249,89 @@ df["risk_level"] = np.where(
 
 ## 🚀 Cómo correr este proyecto
 
+### Opción 1: Con Python (Desarrollo local)
+
 ```bash
 # 1. Clonar el repositorio
-git clone <tu-repo-url>
+git clone https://github.com/Joel-A78/Car-Project.git
 cd Car project
 
 # 2. Crear entorno virtual
 python -m venv .venv
-.venv\Scripts\activate
+.venv\Scripts\activate  # En Windows
+# source .venv/bin/activate  # En Linux/Mac
+
+# 3. Instalar dependencias
+pip install -r requirements.txt
+
+# 4. Ejecutar la app
+streamlit run app.py
+```
+
+La app estará disponible en `http://localhost:8501`
+
+### Opción 2: Con Docker (Producción-ready)
+
+**Requisitos:** Docker y Docker Compose instalados
+
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/Joel-A78/Car-Project.git
+cd Car project
+
+# 2. Construir y ejecutar con Docker Compose
+docker-compose up --build
+
+# O construir la imagen manualmente
+docker build -t motorpulse:latest .
+docker run -p 8501:8501 motorpulse:latest
+```
+
+La app estará disponible en `http://localhost:8501`
+
+**Ventajas de Docker:**
+- Entorno reproducible sin dependencias de máquina local
+- Fácil de desplegar en cloud (Railway, Render, AWS)
+- Incluye health check automático
+- Multi-stage build para menor tamaño de imagen
+
+### Estructura del proyecto
+
+```
+Car project/
+├── app.py                    # Aplicación Streamlit principal
+├── README.md                 # Este archivo
+├── requirements.txt          # Dependencias Python
+├── Dockerfile                # Configuración para containerización
+├── docker-compose.yml        # Orquestación con Docker
+├── .dockerignore             # Archivos excluidos del build
+├── assets/
+│   ├── style.css            # Estilos Motorpulse
+│   └── motorpulse_logo.svg  # Logo del sistema
+├── data/
+│   ├── raw/                 # Datos sin procesar
+│   └── processed/           # Datos procesados
+└── src/
+    ├── __init__.py
+    └── plant_categories.py  # Categorías del dashboard
+```
+
+## 💼 Caso de uso: Manufactura automotriz en Tijuana
+
+Este proyecto demuestra competencias en:
+
+- **Data Analytics:** Análisis de KPIs industriales (OEE, OTIF, Scrap)
+- **Python:** Pandas, NumPy, Plotly para visualización
+- **Streamlit:** Desarrollo de dashboards interactivos
+- **Docker:** Containerización y DevOps
+- **SQL:** Análisis de datos operativos
+- **Business Intelligence:** Interpretación de métricas de manufactura
+
+Ideal para roles en:
+- Data Analyst / Data Engineer
+- Manufacturing Analytics Engineer
+- Business Intelligence Developer
+- Operations Analyst
 
 # 3. Instalar dependencias
 pip install -r requirements.txt

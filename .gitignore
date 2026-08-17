@@ -8,8 +8,23 @@ __pycache__/
 .data/
 streamlit-cache/
 .env
+.env.local
 .DS_Store
 
 # project data
 /data/raw/
 /data/processed/
+
+# Docker volumes
+.streamlit/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+

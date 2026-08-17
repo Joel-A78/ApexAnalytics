@@ -1,7 +1,6 @@
 """Dashboard industrial para un proyecto de portafolio automotriz en Tijuana."""
 
 from __future__ import annotations
-
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -10,9 +9,9 @@ import streamlit as st
 from src.plant_categories import CATEGORIES, get_category
 
 st.set_page_config(
-    page_title="Plant Performance Intelligence",
+    page_title="Motorpulse",
     layout="wide",
-    page_icon="🏭",
+    page_icon="⚙",
 )
 
 

@@ -124,18 +124,10 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-summary_tab, quality_tab, inventory_tab, maintenance_tab = st.tabs(
-    [
-        "▼ Resumen general",
-        "✓ Calidad y scrap",
-        "◆ Inventario y OTIF",
-        "⚙ Mantenimiento y paros",
-    ]
-)
-
 kpis = compute_kpis(sample_data)
 
-with summary_tab:
+# Mostrar contenido dinámicamente según la categoría seleccionada
+if selected_id == "plant_overview":
     k1, k2, k3, k4 = st.columns(4)
     k1.metric("OEE promedio", f"{kpis['oee']}%")
     k2.metric("Scrap total", f"{kpis['scrap_pct']}%")
@@ -186,7 +178,7 @@ with summary_tab:
         )
         st.plotly_chart(fig_scrap, use_container_width=True)
 
-with quality_tab:
+elif selected_id == "quality":
     defect_summary = (
         sample_data.groupby("defect_type", as_index=False)["scrap_units"]
         .sum()
@@ -227,7 +219,7 @@ with quality_tab:
     )
     st.plotly_chart(fig_quality, use_container_width=True)
 
-with inventory_tab:
+elif selected_id == "inventory":
     inventory = sample_data.groupby("supplier", as_index=False).agg(
         stock=("stock", "mean"),
         otif=("otif", "mean"),
@@ -257,7 +249,7 @@ with inventory_tab:
     risk_summary = stock_risk.groupby("risk_flag", as_index=False).size()
     st.dataframe(risk_summary, hide_index=True)
 
-with maintenance_tab:
+elif selected_id == "maintenance":
     downtime = (
         sample_data.groupby("machine", as_index=False)
         .agg(downtime_min=("downtime_min", "sum"), oee=("oee", "mean"))

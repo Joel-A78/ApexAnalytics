@@ -32,7 +32,6 @@ Thumbs.db
 .env.local
 
 # Data
-data/raw/fastf1_cache/
 *.log
 .streamlit/
 

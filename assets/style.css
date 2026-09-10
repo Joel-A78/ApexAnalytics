@@ -1,198 +1,575 @@
-/* assets/style.css
-   Tema visual Motorpulse: paleta basada en el logo automotriz
-   
-   - Azul oscuro (--pit-bg): color de fondo profesional
-   - Azul brillante (--accent-primary): elementos activos e identidad
-   - Cyan/Verde (--accent-green): estados positivos, datos válidos
-   - Rojo alerta: estados críticos
-   - Ámbar: estados pendientes/advertencia
-   - Azul informativo: datos secundarios
-*/
+@import url("https://fonts.googleapis.com/css2?family=Chivo:wght@400;600;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap");
+
+/* ============================================================
+   F1 Race Analytics — Design System
+   Primary #E10600 · Secondary #00E5FF · Tertiary #8800FF · Neutral #13171F
+   Headline/Body: Chivo · Label: JetBrains Mono
+   ============================================================ */
 
 :root {
-    --pit-bg: #00274D;           /* azul oscuro principal */
-    --pit-panel: #003D7A;        /* azul más claro para paneles */
-    --pit-panel-alt: #001F3F;    /* azul aún más oscuro para contraste */
-    --pit-border: #0074D9;       /* borde azul brillante */
-    --pit-text: #FFFFFF;         /* texto blanco */
-    --pit-muted: #A0A0A0;        /* texto mutado */
+    /* Paleta principal */
+    --primary: #E10600;
+    --primary-dark: #B30500;
+    --primary-soft: rgba(225, 6, 0, 0.15);
+    --primary-glow: rgba(225, 6, 0, 0.45);
 
-    --accent-primary: #0096FF;   /* azul brillante: elementos activos, Motorpulse identity */
-    --accent-green: #00FF7F;     /* verde/cyan brillante: válido, positivo */
-    --accent-red: #FF3B3B;       /* rojo: crítico, alerta */
-    --accent-amber: #FFB800;     /* ámbar: pendiente, advertencia */
-    --accent-blue: #00D9FF;      /* cyan: informativo, datos secundarios */
+    --secondary: #00E5FF;
+    --secondary-dark: #00B8D4;
+    --secondary-soft: rgba(0, 229, 255, 0.12);
+
+    --tertiary: #8800FF;
+    --tertiary-dark: #6A00CC;
+    --tertiary-soft: rgba(136, 0, 255, 0.14);
+
+    --neutral: #000000;
+    --neutral-soft: #0A0A0A;
+    --neutral-line: #1F1F1F;
+
+    --peach: #F4A28C;
+    --peach-dark: #E0856C;
+
+    --white: #FFFFFF;
+    --white-soft: #E6E8EE;
+    --muted: #8A92A6;
+
+    /* Compuestos Pirelli */
+    --compound-soft: #E10600;
+    --compound-medium: #FFD500;
+    --compound-hard: #FFFFFF;
+    --compound-inter: #00B050;
+    --compound-wet: #1E90FF;
 }
 
-/* Fondo general de la app */
-[data-testid="stAppViewContainer"],
+/* ----- Base ----- */
+html, body, [data-testid="stAppViewContainer"] {
+    background: var(--neutral);
+    color: var(--white);
+    font-family: "Chivo", "Segoe UI", system-ui, sans-serif;
+    font-weight: 400;
+}
+
 [data-testid="stHeader"] {
-    background-color: var(--pit-bg);
+    background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border-bottom: 2px solid var(--primary-dark);
 }
 
-[data-testid="stSidebar"] {
-    background-color: var(--pit-panel);
-    border-right: 1px solid var(--pit-border);
+/* Banda de meta (checkered) fija arriba */
+[data-testid="stAppViewContainer"]::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: repeating-conic-gradient(
+        var(--white) 0% 25%,
+        var(--neutral) 0% 50%
+    ) 0 0 / 14px 14px;
+    z-index: 9999;
 }
 
-/* Encabezado tipo "pit board" */
-.pit-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 1rem 1.25rem;
-    background: linear-gradient(90deg, var(--pit-panel) 0%, var(--pit-bg) 100%);
-    border: 1px solid var(--pit-border);
-    border-left: 4px solid var(--accent-primary);
-    border-radius: 8px;
-    margin-bottom: 1rem;
+/* ----- Sidebar ----- */
+[data-testid="stSidebar"],
+[data-testid="stSidebar"] > div,
+[data-testid="stSidebar"] > div:first-child,
+section[data-testid="stSidebar"] {
+    background: #000000 !important;
+    background-color: #000000 !important;
+    border-right: 3px solid var(--primary);
 }
 
-.pit-header h1 {
-    margin: 0;
-    font-size: 1.4rem;
-    letter-spacing: 0.02em;
-    color: var(--pit-text);
-}
-
-.pit-header p {
-    margin: 0;
-    color: var(--pit-muted);
-    font-size: 0.9rem;
-}
-
-/* Tarjetas de categoría / estado */
-.category-card {
-    border: 1px solid var(--pit-border);
-    border-radius: 10px;
-    padding: 0.85rem;
-    background: var(--pit-panel);
-    height: 100%;
-}
-
-.category-card.disabled {
-    opacity: 0.5;
-}
-
-.category-card .icon {
-    font-size: 1.8rem;
-}
-
-.category-badge {
-    display: inline-block;
-    font-size: 0.72rem;
-    font-weight: 600;
-    padding: 0.15rem 0.55rem;
-    border-radius: 999px;
-    text-transform: uppercase;
+[data-testid="stSidebar"] h2 {
+    color: var(--white);
+    font-family: "Chivo", sans-serif;
+    font-weight: 900;
     letter-spacing: 0.04em;
+    text-transform: uppercase;
 }
 
-.badge-available {
-    background: rgba(44, 160, 44, 0.15);
-    color: var(--accent-green);
-    border: 1px solid rgba(44, 160, 44, 0.4);
-}
-
-.badge-coming-soon {
-    background: rgba(230, 164, 23, 0.15);
-    color: var(--accent-amber);
-    border: 1px solid rgba(230, 164, 23, 0.4);
-}
-
-/* Banderas de validación reglamentaria, reutilizable en F1 y Resistencia */
-.reg-flag-legal {
-    color: var(--accent-green);
-    font-weight: 600;
-}
-
-.reg-flag-illegal {
-    color: var(--accent-red);
-    font-weight: 600;
-}
-
-/* Métricas (st.metric) con tarjeta propia */
-[data-testid="stMetricValue"] {
-    color: var(--pit-text);
-}
-
-[data-testid="stMetric"] {
-    background: var(--pit-panel);
-    border: 1px solid var(--pit-border);
-    border-radius: 8px;
-    padding: 0.6rem 0.8rem;
-}
-
-/* Pestañas: resalta la pestaña activa con el color de marca */
-button[data-baseweb="tab"][aria-selected="true"] {
-    color: var(--accent-primary) !important;
-    border-bottom-color: var(--accent-primary) !important;
-}
-
-/* Botones primarios en color de marca */
-button[kind="primary"] {
-    background-color: var(--accent-primary) !important;
-    border-color: var(--accent-primary) !important;
-}
-
-/* Reduce el padding superior por defecto de Streamlit para que el
-   encabezado quede más pegado a la parte superior */
-.block-container {
-    padding-top: 1.5rem;
-}
-
-/* Tarjetas de dashboard */
-[data-testid="stMetric"],
-div[data-testid="stVerticalBlock"] > div[data-testid="stHorizontalBlock"] > div {
-    border-radius: 12px;
-}
-
-/* Badge de serie (submenú de Resistencia) — NO son logos oficiales,
-   son un identificador visual propio (color + iniciales) porque los
-   logos reales de WEC/IMSA/ACO son marca registrada. */
-.series-badge {
+/* ----- Brand block (APEX Analytics) ----- */
+.apex-brand {
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.6rem 1rem;
-    background: var(--pit-panel-alt);
-    border: 1px solid var(--pit-border);
-    border-radius: 8px;
-    margin-bottom: 1rem;
-}
-
-.series-badge .mark {
-    width: 44px;
-    height: 44px;
-    border-radius: 8px;
-    display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-weight: 800;
-    font-size: 0.78rem;
-    letter-spacing: 0.02em;
-    color: #ffffff;
-    flex-shrink: 0;
+    gap: 0.65rem;
+    padding: 1rem 0.75rem;
+    background: #000000;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+    border-top: 2px solid var(--primary);
+    border-bottom: 2px solid var(--primary);
 }
 
-.series-badge .label {
+.apex-brand .apex-logo {
+    width: 100%;
+    max-width: 320px;
+    height: auto;
+    background: transparent;
+    flex-shrink: 0;
+    object-fit: contain;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    padding: 0;
+    border: none;
+    align-self: center;
+    -webkit-font-smoothing: antialiased;
+}
+
+.apex-brand .apex-meta {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+}
+
+.apex-brand .apex-name {
+    font-family: "Chivo", "Arial Black", sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--white);
+}
+
+.apex-brand .apex-name span {
+    color: var(--secondary);
+}
+
+.apex-brand .apex-tag {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 700;
+    margin-top: 0.3rem;
+    text-transform: uppercase;
+}
+
+/* ----- Eyebrow / labels (JetBrains Mono) ----- */
+.eyebrow {
+    color: var(--primary);
+    font-family: "JetBrains Mono", "Consolas", monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+/* ----- Command header ----- */
+.command-header {
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.25rem;
+    background:
+        linear-gradient(135deg, var(--primary-soft) 0%, transparent 55%),
+        var(--neutral-soft);
+    border-left: 6px solid var(--primary);
+    border-top: 1px solid var(--neutral-line);
+    border-right: 1px solid var(--neutral-line);
+    border-bottom: 1px solid var(--neutral-line);
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+}
+
+.command-header::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 100%;
+    background: var(--primary);
+}
+
+.command-header h1 {
+    color: var(--white);
+    font-family: "Chivo", sans-serif;
+    font-size: clamp(1.6rem, 3vw, 2.3rem);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin: 0.25rem 0 0;
+}
+
+.command-header p {
+    color: var(--white-soft);
+    margin: 0.3rem 0 0;
+    font-family: "Chivo", sans-serif;
+}
+
+/* ----- KPI cards ----- */
+.kpi-card {
+    background: var(--neutral-soft);
+    border: 1px solid var(--neutral-line);
+    border-top: 3px solid var(--primary);
+    border-radius: 6px;
+    padding: 1rem 1.1rem;
+    min-height: 6.2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.kpi-card.cyan { border-top-color: var(--secondary); }
+.kpi-card.purple { border-top-color: var(--tertiary); }
+.kpi-card.peach { border-top-color: var(--peach); }
+.kpi-card.white { border-top-color: var(--white); }
+
+.kpi-label {
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     font-weight: 600;
-    color: var(--pit-text);
+}
+
+.kpi-value {
+    color: var(--white);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.kpi-sub { color: var(--muted); font-size: 0.7rem; font-family: "JetBrains Mono", monospace; }
+
+/* ----- Race event cards ----- */
+.race-card {
+    background: var(--neutral-soft);
+    border: 1px solid var(--neutral-line);
+    border-left: 4px solid var(--primary);
+    border-radius: 6px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 0.85rem;
+    position: relative;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.race-card:hover {
+    border-left-color: var(--secondary);
+    transform: translateX(2px);
+}
+
+.round-tag {
+    display: inline-block;
+    background: var(--white);
+    color: var(--neutral);
+    padding: 0.15rem 0.55rem;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: 4px;
+}
+
+.round-tag.live {
+    background: var(--primary);
+    color: var(--white);
+    animation: f1-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes f1-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 var(--primary-glow); }
+    50% { box-shadow: 0 0 0 8px rgba(225, 6, 0, 0); }
+}
+
+.race-name {
+    color: var(--white);
+    font-family: "Chivo", sans-serif;
+    font-size: 1.3rem;
+    font-weight: 900;
+    margin: 0.4rem 0 0.15rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.circuit-name {
+    color: var(--white-soft);
+    font-size: 0.9rem;
+    font-family: "Chivo", sans-serif;
+}
+
+.race-dates {
+    color: var(--primary);
+    font-weight: 700;
+    font-family: "JetBrains Mono", monospace;
     font-size: 0.95rem;
 }
 
-.series-badge .desc {
-    color: var(--pit-muted);
-    font-size: 0.8rem;
-    margin-top: 0.1rem;
+/* ----- Session chips ----- */
+.session-chip {
+    display: inline-block;
+    margin: 0.15rem 0.25rem 0.15rem 0;
+    padding: 0.3rem 0.6rem;
+    background: var(--neutral);
+    border: 1px solid var(--neutral-line);
+    border-radius: 4px;
+    color: var(--white);
+    font-size: 0.75rem;
+    font-family: "JetBrains Mono", monospace;
 }
 
-.series-pill {
-    display: inline-block;
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
-    font-size: 0.72rem;
+.session-chip .day { color: var(--muted); margin-right: 0.35rem; }
+.session-chip .label {
+    color: var(--primary);
     font-weight: 700;
-    color: #ffffff;
-    margin-right: 0.4rem;
+    text-transform: uppercase;
+    margin-right: 0.25rem;
+}
+
+/* ----- Compound chips ----- */
+.compound-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.55rem;
+    border: 1px solid var(--neutral-line);
+    background: var(--neutral);
+    color: var(--white);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-right: 0.25rem;
+    border-radius: 4px;
+}
+
+.compound-chip .stripe {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    border: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.compound-chip.soft .stripe { background: var(--compound-soft); }
+.compound-chip.medium .stripe { background: var(--compound-medium); }
+.compound-chip.hard .stripe { background: var(--compound-hard); border-color: var(--neutral-line); }
+.compound-chip.inter .stripe { background: var(--compound-inter); }
+.compound-chip.wet .stripe { background: var(--compound-wet); }
+
+/* ----- Strategy recommended banner ----- */
+.strategy-banner {
+    padding: 1.4rem 1.5rem;
+    border: 2px solid var(--primary);
+    background:
+        linear-gradient(135deg, var(--primary-soft) 0%, transparent 60%),
+        var(--neutral-soft);
+    margin: 0.5rem 0 1rem 0;
+    position: relative;
+    border-radius: 6px;
+}
+
+.strategy-banner::before {
+    content: "POLE POSITION";
+    position: absolute;
+    top: -10px;
+    left: 16px;
+    background: var(--primary);
+    color: var(--white);
+    padding: 0.2rem 0.7rem;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    border-radius: 3px;
+}
+
+/* ----- Streamlit st.metric ----- */
+[data-testid="stMetric"] {
+    background: var(--neutral-soft);
+    border: 1px solid var(--neutral-line);
+    border-top: 3px solid var(--primary);
+    border-radius: 6px;
+    padding: 0.7rem 0.9rem;
+}
+
+[data-testid="stMetricValue"] {
+    color: var(--white);
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 700;
+}
+
+[data-testid="stMetricLabel"] {
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+}
+
+[data-testid="stMetricDelta"] svg { display: none; }
+
+/* ----- Tabs ----- */
+button[data-baseweb="tab"][aria-selected="true"] {
+    color: var(--primary) !important;
+    border-bottom-color: var(--primary) !important;
+    font-weight: 700;
+    font-family: "Chivo", sans-serif;
+}
+
+button[data-baseweb="tab"] { color: var(--muted) !important; }
+
+/* ----- Buttons ----- */
+button[kind="primary"] {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: var(--white) !important;
+    font-family: "Chivo", sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+button[kind="primary"]:hover {
+    background-color: var(--primary-dark) !important;
+    border-color: var(--primary-dark) !important;
+}
+
+button[kind="secondary"] {
+    background-color: var(--peach) !important;
+    border-color: var(--peach) !important;
+    color: var(--neutral) !important;
+    font-family: "Chivo", sans-serif;
+    font-weight: 700;
+}
+
+/* ----- Headings (Chivo) ----- */
+h1, h2, h3, h4 {
+    color: var(--white);
+    font-family: "Chivo", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-weight: 900;
+}
+
+h3 { color: var(--primary); }
+
+/* ----- Body text ----- */
+p, li, label, span, div {
+    font-family: "Chivo", sans-serif;
+}
+
+/* ----- Dataframe ----- */
+[data-testid="stDataFrame"] {
+    border: 1px solid var(--neutral-line);
+    background: var(--neutral-soft);
+    border-radius: 6px;
+}
+
+/* ----- Layout ----- */
+.block-container {
+    max-width: 1720px;
+    padding-top: 2.25rem;
+    padding-bottom: 3rem;
+}
+
+[data-testid="stSidebar"] [data-testid="stRadio"] label {
+    color: var(--white);
+    font-weight: 600;
+}
+
+/* ----- Captions / muted ----- */
+.stCaption, [data-testid="stCaptionContainer"] {
+    color: var(--muted) !important;
+    font-family: "JetBrains Mono", monospace;
+}
+
+/* ----- Info / alerts ----- */
+[data-testid="stInfo"] {
+    background: var(--neutral-soft);
+    border: 1px solid var(--neutral-line);
+    border-left: 4px solid var(--secondary);
+    border-radius: 6px;
+}
+
+.stAlert[data-baseweb="notification"] {
+    background: var(--neutral-soft);
+    border: 1px solid var(--neutral-line);
+    color: var(--white);
+}
+
+/* ----- Inputs / selectbox ----- */
+[data-baseweb="select"] > div,
+[data-baseweb="input"] > div,
+[data-baseweb="textarea"] > div {
+    background: var(--neutral-soft) !important;
+    border-color: var(--neutral-line) !important;
+    color: var(--white) !important;
+    border-radius: 4px !important;
+    font-family: "Chivo", sans-serif;
+}
+
+[data-baseweb="select"] span,
+[data-baseweb="input"] input {
+    color: var(--white) !important;
+    font-family: "Chivo", sans-serif;
+}
+
+[data-baseweb="slider"] [role="slider"] {
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
+}
+
+/* ----- Plotly chart container ----- */
+[data-testid="stPlotlyChart"] {
+    background: var(--neutral-soft);
+    border: 1px solid var(--neutral-line);
+    border-radius: 6px;
+    padding: 0.5rem;
+}
+
+/* ----- Overview: video as background ----- */
+.overview-wrap {
+    position: relative;
+    overflow: hidden;
+    background: #000000;
+    padding: 1rem 0 2rem 0;
+    border-radius: 6px;
+}
+
+.overview-wrap .bg-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    z-index: 0;
+}
+
+.overview-wrap .bg-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(180deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.78) 100%),
+        linear-gradient(90deg, rgba(225,6,0,0.10) 0%, transparent 50%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* Lift content above video + overlay */
+.overview-wrap > div:not(.bg-video):not(.bg-overlay) {
+    position: relative;
+    z-index: 2;
+}
+
+/* Cards y metricas con fondo solido sobre el video */
+.overview-wrap .race-card,
+.overview-wrap [data-testid="stMetric"] {
+    background: rgba(10, 10, 10, 0.88) !important;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.overview-wrap [data-testid="stMetricValue"],
+.overview-wrap [data-testid="stMetricLabel"] {
+    color: var(--white) !important;
+}
+
+.overview-wrap [data-testid="stDataFrame"] {
+    background: rgba(10, 10, 10, 0.92) !important;
+}
+
+/* ----- Mobile ----- */
+@media (max-width: 700px) {
+    .block-container { padding: 1rem 0.75rem 2rem; }
+    .race-card { padding: 0.85rem 0.9rem; }
+    .command-header { padding: 1.1rem 1.25rem; }
 }

@@ -33,6 +33,7 @@ class Circuit:
     overtaking_difficulty: float
     safety_car_prob: float
     notes: str
+    typical_laps: int = 58
 
 
 @dataclass(frozen=True)
@@ -68,29 +69,30 @@ COMPOUNDS: dict[str, Compound] = {
 
 
 CIRCUITS: dict[str, Circuit] = {
-    "Bahrain": Circuit("Bahrain", 91.0, 22.0, 1.10, 0.40, 0.18, "Alta abrasion, castigo rear."),
-    "Jeddah": Circuit("Jeddah", 89.0, 21.0, 1.00, 0.55, 0.10, "Calles rapidas, muros cerca."),
-    "Melbourne": Circuit("Melbourne", 80.0, 20.0, 0.95, 0.55, 0.12, "Mixto, degradacion media."),
-    "Suzuka": Circuit("Suzuka", 91.0, 21.5, 1.00, 0.55, 0.10, "Escenario clasico, ritmo alto."),
-    "Shanghai": Circuit("Shanghai", 95.0, 20.0, 1.00, 0.55, 0.10, "Rectas largas, frenadas fuertes."),
-    "Miami": Circuit("Miami", 91.0, 20.0, 0.95, 0.55, 0.12, "Asfalto nuevo, baja abrasion."),
-    "Imola": Circuit("Imola", 75.0, 22.0, 1.05, 0.80, 0.10, "Estrecho, dificil adelantar."),
-    "Monaco": Circuit("Monaco", 73.0, 21.5, 0.85, 0.95, 0.08, "Pista mas estrecha, undercut manda."),
-    "Montreal": Circuit("Montreal", 72.0, 19.5, 1.00, 0.60, 0.18, "Frenadas fuertes, alta SC."),
-    "Catalunya": Circuit("Barcelona", 77.0, 20.0, 1.08, 0.70, 0.10, "Alto deg termico."),
-    "Red Bull Ring": Circuit("Red Bull Ring", 67.0, 19.0, 0.95, 0.50, 0.10, "Pista corta, 1 parada comun."),
-    "Silverstone": Circuit("Silverstone", 88.0, 19.0, 1.05, 0.60, 0.08, "Curvas de alta velocidad."),
-    "Hungaroring": Circuit("Hungaroring", 77.0, 20.0, 1.05, 0.85, 0.10, "Monaco-like, estrategia manda."),
-    "Spa-Francorchamps": Circuit("Spa-Francorchamps", 106.0, 21.0, 1.00, 0.50, 0.18, "Cambios de clima, eccpp."),
-    "Zandvoort": Circuit("Zandvoort", 72.0, 21.0, 1.00, 0.80, 0.10, "Bancadas inclinadas."),
-    "Monza": Circuit("Monza", 81.0, 20.0, 0.95, 0.70, 0.10, "Templo de la velocidad, 1 parada."),
-    "Baku": Circuit("Baku", 103.0, 22.0, 0.95, 0.60, 0.20, "Alta SC, muros cerca."),
-    "Marina Bay": Circuit("Marina Bay", 95.0, 23.0, 1.05, 0.85, 0.25, "Nocturna, alta SC."),
-    "COTA": Circuit("COTA", 95.0, 20.0, 1.05, 0.65, 0.10, "Mix completo, variedad de estrategias."),
-    "Mexico City": Circuit("Mexico City", 78.0, 21.0, 1.00, 0.60, 0.12, "Altitud, motor manda."),
-    "Interlagos": Circuit("Interlagos", 71.0, 22.0, 1.05, 0.50, 0.22, "Variable, SC probable."),
-    "Las Vegas": Circuit("Las Vegas", 84.0, 21.0, 0.95, 0.60, 0.10, "Rectas larguisimas."),
-    "Abu Dhabi": Circuit("Abu Dhabi", 87.0, 21.0, 1.00, 0.60, 0.08, "Cierre de temporada."),
+    "Bahrain": Circuit("Bahrain", 91.0, 22.0, 1.10, 0.40, 0.18, "Alta abrasion, castigo rear.", 57),
+    "Jeddah": Circuit("Jeddah", 89.0, 21.0, 1.00, 0.55, 0.10, "Calles rapidas, muros cerca.", 50),
+    "Melbourne": Circuit("Melbourne", 80.0, 20.0, 0.95, 0.55, 0.12, "Mixto, degradacion media.", 58),
+    "Suzuka": Circuit("Suzuka", 91.0, 21.5, 1.00, 0.55, 0.10, "Escenario clasico, ritmo alto.", 53),
+    "Shanghai": Circuit("Shanghai", 95.0, 20.0, 1.00, 0.55, 0.10, "Rectas largas, frenadas fuertes.", 56),
+    "Miami": Circuit("Miami", 91.0, 20.0, 0.95, 0.55, 0.12, "Asfalto nuevo, baja abrasion.", 57),
+    "Imola": Circuit("Imola", 75.0, 22.0, 1.05, 0.80, 0.10, "Estrecho, dificil adelantar.", 63),
+    "Monaco": Circuit("Monaco", 73.0, 21.5, 0.85, 0.95, 0.08, "Pista mas estrecha, undercut manda.", 78),
+    "Montreal": Circuit("Montreal", 72.0, 19.5, 1.00, 0.60, 0.18, "Frenadas fuertes, alta SC.", 70),
+    "Catalunya": Circuit("Barcelona", 77.0, 20.0, 1.08, 0.70, 0.10, "Alto deg termico.", 66),
+    "Red Bull Ring": Circuit("Red Bull Ring", 67.0, 19.0, 0.95, 0.50, 0.10, "Pista corta, 1 parada comun.", 71),
+    "Silverstone": Circuit("Silverstone", 88.0, 19.0, 1.05, 0.60, 0.08, "Curvas de alta velocidad.", 52),
+    "Hungaroring": Circuit("Hungaroring", 77.0, 20.0, 1.05, 0.85, 0.10, "Monaco-like, estrategia manda.", 70),
+    "Spa-Francorchamps": Circuit("Spa-Francorchamps", 106.0, 21.0, 1.00, 0.50, 0.18, "Cambios de clima, eccpp.", 44),
+    "Zandvoort": Circuit("Zandvoort", 72.0, 21.0, 1.00, 0.80, 0.10, "Bancadas inclinadas.", 72),
+    "Monza": Circuit("Monza", 81.0, 20.0, 0.95, 0.70, 0.10, "Templo de la velocidad, 1 parada.", 53),
+    "Baku": Circuit("Baku", 103.0, 22.0, 0.95, 0.60, 0.20, "Alta SC, muros cerca.", 51),
+    "Marina Bay": Circuit("Marina Bay", 95.0, 23.0, 1.05, 0.85, 0.25, "Nocturna, alta SC.", 62),
+    "COTA": Circuit("COTA", 95.0, 20.0, 1.05, 0.65, 0.10, "Mix completo, variedad de estrategias.", 56),
+    "Mexico City": Circuit("Mexico City", 78.0, 21.0, 1.00, 0.60, 0.12, "Altitud, motor manda.", 71),
+    "Madrid": Circuit("Madrid", 80.0, 20.5, 1.05, 0.75, 0.12, "Nuevo trazado urbano Madring, semi-estrecho.", 66),
+    "Interlagos": Circuit("Interlagos", 71.0, 22.0, 1.05, 0.50, 0.22, "Variable, SC probable.", 71),
+    "Las Vegas": Circuit("Las Vegas", 84.0, 21.0, 0.95, 0.60, 0.10, "Rectas larguisimas.", 50),
+    "Abu Dhabi": Circuit("Abu Dhabi", 87.0, 21.0, 1.00, 0.60, 0.08, "Cierre de temporada.", 58),
 }
 
 

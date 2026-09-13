@@ -1,8 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Chivo:wght@400;600;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap");
 
 /* ============================================================
-   F1 Race Analytics — Design System
-   Primary #E10600 · Secondary #00E5FF · Tertiary #8800FF · Neutral #13171F
+   F1 Race Analytics — Diseño de pagina
+   Primario #E10600 · Secundario #00E5FF · Terciario #8800FF · Neutral #000000
    Headline/Body: Chivo · Label: JetBrains Mono
    ============================================================ */
 
@@ -22,8 +22,8 @@
     --tertiary-soft: rgba(136, 0, 255, 0.14);
 
     --neutral: #000000;
-    --neutral-soft: #0A0A0A;
-    --neutral-line: #1F1F1F;
+    --neutral-soft: #1A1F2A;
+    --neutral-line: #232938;
 
     --peach: #F4A28C;
     --peach-dark: #E0856C;
@@ -32,12 +32,12 @@
     --white-soft: #E6E8EE;
     --muted: #8A92A6;
 
-    /* Compuestos Pirelli */
-    --compound-soft: #E10600;
-    --compound-medium: #FFD500;
-    --compound-hard: #FFFFFF;
-    --compound-inter: #00B050;
-    --compound-wet: #1E90FF;
+    /* Compuestos Pirelli (alineados al sistema) */
+    --compound-soft: var(--primary);
+    --compound-medium: var(--peach);
+    --compound-hard: var(--white);
+    --compound-inter: var(--secondary);
+    --compound-wet: var(--tertiary);
 }
 
 /* ----- Base ----- */
@@ -69,12 +69,8 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 
 /* ----- Sidebar ----- */
-[data-testid="stSidebar"],
-[data-testid="stSidebar"] > div,
-[data-testid="stSidebar"] > div:first-child,
-section[data-testid="stSidebar"] {
-    background: #000000 !important;
-    background-color: #000000 !important;
+[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, var(--neutral) 0%, #000000 100%);
     border-right: 3px solid var(--primary);
 }
 
@@ -86,63 +82,50 @@ section[data-testid="stSidebar"] {
     text-transform: uppercase;
 }
 
-/* ----- Brand block (APEX Analytics) ----- */
-.apex-brand {
+/* ----- Brand block ----- */
+.f1-brand {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 0.65rem;
-    padding: 1rem 0.75rem;
-    background: #000000;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    border-radius: 6px;
     color: var(--white);
     margin-bottom: 0.5rem;
-    border-top: 2px solid var(--primary);
-    border-bottom: 2px solid var(--primary);
 }
 
-.apex-brand .apex-logo {
-    width: 100%;
-    max-width: 320px;
-    height: auto;
-    background: transparent;
-    flex-shrink: 0;
-    object-fit: contain;
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-    padding: 0;
-    border: none;
-    align-self: center;
-    -webkit-font-smoothing: antialiased;
-}
-
-.apex-brand .apex-meta {
+.f1-brand .logo {
+    width: 42px;
+    height: 42px;
+    background: var(--white);
+    color: var(--primary);
+    border-radius: 50%;
     display: flex;
-    flex-direction: column;
-    line-height: 1.05;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.2rem;
+    font-family: "Chivo", sans-serif;
+    flex-shrink: 0;
 }
 
-.apex-brand .apex-name {
-    font-family: "Chivo", "Arial Black", sans-serif;
+.f1-brand .name {
+    font-family: "Chivo", sans-serif;
     font-weight: 900;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--white);
+    line-height: 1.1;
 }
 
-.apex-brand .apex-name span {
-    color: var(--secondary);
-}
-
-.apex-brand .apex-tag {
+.f1-brand .name small {
+    display: block;
     font-family: "JetBrains Mono", monospace;
-    font-size: 0.58rem;
-    letter-spacing: 0.18em;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
     color: rgba(255, 255, 255, 0.85);
-    font-weight: 700;
-    margin-top: 0.3rem;
-    text-transform: uppercase;
+    font-weight: 600;
+    margin-top: 0.15rem;
 }
 
 /* ----- Eyebrow / labels (JetBrains Mono) ----- */
@@ -343,9 +326,254 @@ section[data-testid="stSidebar"] {
 
 .compound-chip.soft .stripe { background: var(--compound-soft); }
 .compound-chip.medium .stripe { background: var(--compound-medium); }
-.compound-chip.hard .stripe { background: var(--compound-hard); border-color: var(--neutral-line); }
+.compound-chip.hard .stripe { background: var(--compound-hard); }
 .compound-chip.inter .stripe { background: var(--compound-inter); }
 .compound-chip.wet .stripe { background: var(--compound-wet); }
+
+/* ----- Weather card (Raceweek) ----- */
+.weather-card {
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.08) 0%, transparent 60%), var(--neutral-soft);
+    border: 1px solid var(--neutral-line);
+    border-left: 5px solid #00E5FF;
+    border-radius: 6px;
+    padding: 1rem 1.2rem;
+    height: 100%;
+}
+
+.weather-card .wx-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--neutral-line);
+}
+
+.weather-card .wx-now {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.weather-card .wx-icon {
+    font-size: 2.4rem;
+    line-height: 1;
+}
+
+.weather-card .wx-temp {
+    color: var(--white);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 2.2rem;
+    font-weight: 800;
+}
+
+.weather-card .wx-desc {
+    color: var(--white-soft);
+    font-size: 0.85rem;
+    margin-top: 0.2rem;
+}
+
+.weather-card .wx-wind {
+    text-align: right;
+}
+
+.weather-card .wx-wind-val {
+    color: var(--white);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.weather-card .wx-wind-dir {
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.7rem;
+    margin-top: 0.15rem;
+}
+
+.weather-card .wx-forecast {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    padding-top: 0.7rem;
+}
+
+.weather-card .wx-day {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid var(--neutral-line);
+    border-radius: 4px;
+    padding: 0.5rem 0.4rem;
+}
+
+.weather-card .wx-day-label {
+    color: var(--secondary);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.weather-card .wx-day-temps {
+    color: var(--white);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-top: 0.2rem;
+}
+
+.weather-card .wx-day-pop {
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.65rem;
+    margin-top: 0.15rem;
+}
+
+/* ----- Circuit map card (Raceweek) ----- */
+.circuit-card {
+    background: var(--neutral-soft);
+    border: 1px solid var(--neutral-line);
+    border-left: 5px solid var(--primary);
+    border-radius: 6px;
+    padding: 1rem 1.2rem;
+    height: 100%;
+}
+
+.circuit-card .circuit-coords {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin-bottom: 0.6rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--neutral-line);
+}
+
+.circuit-card .circuit-name {
+    color: var(--white);
+    font-family: "Chivo", sans-serif;
+    font-size: 1.15rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.circuit-card .circuit-place {
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.75rem;
+}
+
+.circuit-card svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 4px;
+}
+
+/* ----- Mode toggle (Historial) ----- */
+.overview-wrap.fixed-bg .mode-toggle {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.9rem 1.1rem;
+    margin: 0 0 1rem 0;
+    background: rgba(70, 75, 86, 0.97);
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    border-radius: 6px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.overview-wrap.fixed-bg .mode-toggle .mode-label {
+    color: var(--secondary);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+
+.overview-wrap.fixed-bg .mode-toggle .mode-pills {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.overview-wrap.fixed-bg .mode-toggle .mode-pill {
+    padding: 0.55rem 1rem;
+    background: rgba(35, 35, 42, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    color: var(--white);
+    font-family: "Chivo", sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.overview-wrap.fixed-bg .mode-toggle .mode-pill.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--white);
+    box-shadow: 0 0 0 2px rgba(225, 6, 0, 0.30);
+}
+
+/* ----- History card (Historial) ----- */
+.history-card {
+    padding: 1.1rem 1.35rem;
+    margin-bottom: 1rem;
+    background: var(--neutral-soft);
+    border-left: 5px solid var(--secondary);
+    border-top: 1px solid var(--neutral-line);
+    border-right: 1px solid var(--neutral-line);
+    border-bottom: 1px solid var(--neutral-line);
+    border-radius: 6px;
+}
+
+.history-card .history-title {
+    color: var(--white);
+    font-family: "Chivo", sans-serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin: 0.2rem 0 0.2rem;
+}
+
+.history-card .history-meta {
+    color: var(--white-soft);
+    font-size: 0.85rem;
+}
+
+/* ----- Next race card (Simulacion header) ----- */
+.next-race-card {
+    padding: 1.1rem 1.35rem;
+    margin-bottom: 1.25rem;
+    background:
+        linear-gradient(135deg, rgba(0, 176, 80, 0.10) 0%, transparent 60%),
+        var(--neutral-soft);
+    border-left: 5px solid #00B050;
+    border-top: 1px solid var(--neutral-line);
+    border-right: 1px solid var(--neutral-line);
+    border-bottom: 1px solid var(--neutral-line);
+    border-radius: 6px;
+}
+
+.next-race-card .next-race-name {
+    color: var(--white);
+    font-family: "Chivo", sans-serif;
+    font-size: 1.45rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin: 0.2rem 0 0.25rem;
+}
+
+.next-race-card .next-race-meta {
+    color: var(--white-soft);
+    font-size: 0.85rem;
+}
 
 /* ----- Strategy recommended banner ----- */
 .strategy-banner {
@@ -515,7 +743,7 @@ p, li, label, span, div {
     padding: 0.5rem;
 }
 
-/* ----- Overview: video as background ----- */
+/* ----- Overview: video as background (Raceweek) ----- */
 .overview-wrap {
     position: relative;
     overflow: hidden;
@@ -544,27 +772,87 @@ p, li, label, span, div {
     pointer-events: none;
 }
 
-/* Lift content above video + overlay */
 .overview-wrap > div:not(.bg-video):not(.bg-overlay) {
     position: relative;
     z-index: 2;
 }
 
-/* Cards y metricas con fondo solido sobre el video */
-.overview-wrap .race-card,
-.overview-wrap [data-testid="stMetric"] {
-    background: rgba(10, 10, 10, 0.88) !important;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+/* ----- Fixed video background (Historial) ----- */
+.overview-wrap.fixed-bg {
+    background: transparent;
+    border-radius: 0;
+    padding: 1.5rem 0 3rem 0;
 }
 
-.overview-wrap [data-testid="stMetricValue"],
-.overview-wrap [data-testid="stMetricLabel"] {
+.overview-wrap.fixed-bg .bg-video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.overview-wrap.fixed-bg .bg-overlay {
+    position: fixed;
+    inset: 0;
+    background:
+        linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.55) 100%),
+        linear-gradient(90deg, rgba(225,6,0,0.08) 0%, transparent 50%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.overview-wrap.fixed-bg > div:not(.bg-video):not(.bg-overlay) {
+    position: relative;
+    z-index: 2;
+}
+
+.overview-wrap.fixed-bg [data-testid="stMetric"] {
+    background: rgba(75, 80, 92, 0.96) !important;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    border: 1px solid rgba(255, 255, 255, 0.30) !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+
+.overview-wrap.fixed-bg [data-testid="stDataFrame"] {
+    background: rgba(70, 75, 86, 0.97) !important;
+    border: 1px solid rgba(255, 255, 255, 0.30) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.overview-wrap.fixed-bg [data-testid="stPlotlyChart"] {
+    background: rgba(70, 75, 86, 0.97) !important;
+    border: 1px solid rgba(255, 255, 255, 0.30) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.overview-wrap.fixed-bg [data-testid="stInfo"] {
+    background: rgba(70, 75, 86, 0.97) !important;
+    border: 1px solid rgba(255, 255, 255, 0.30) !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+
+.overview-wrap.fixed-bg .command-header,
+.overview-wrap.fixed-bg .history-card,
+.overview-wrap.fixed-bg .race-card,
+.overview-wrap.fixed-bg .circuit-card,
+.overview-wrap.fixed-bg .weather-card {
+    background: rgba(70, 75, 86, 0.97);
+    border-color: rgba(255, 255, 255, 0.28);
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.55);
+}
+
+.overview-wrap.fixed-bg [data-baseweb="select"] > div,
+.overview-wrap.fixed-bg [data-baseweb="input"] > div,
+.overview-wrap.fixed-bg [data-baseweb="textarea"] > div {
+    background: rgba(85, 90, 102, 0.98) !important;
+    border: 1px solid rgba(255, 255, 255, 0.35) !important;
     color: var(--white) !important;
-}
-
-.overview-wrap [data-testid="stDataFrame"] {
-    background: rgba(10, 10, 10, 0.92) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 /* ----- Mobile ----- */

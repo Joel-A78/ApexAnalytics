@@ -1,9 +1,10 @@
-"""Generador de diagramas SVG de circuitos F1.
+"""Generador de diagramas SVG de circuitos de Formula 1.
 
 Dada una clave de circuito (ej. 'Bahrain', 'Monaco'), dibuja un trazado
 estilizado cerrado con 3 sectores coloreados y la linea de meta.
-No usa APIs externas: el trazado se genera proceduralmente con un seed
-derivado del nombre para que cada circuito tenga una silueta distinta.
+No usa APIs externas: la silueta se genera proceduralmente con un seed
+derivado del nombre, usando una funcion radial suave (armonicos) para
+obtener curvas organicas en lugar de poligonos rigidos.
 """
 
 from __future__ import annotations
@@ -11,10 +12,11 @@ from __future__ import annotations
 import math
 import random
 
-W, H = 640, 420
-CX, CY = W / 2, H / 2
-BASE_RX = 260
-BASE_RY = 160
+W, H = 720, 460
+CX, CY = W / 2, H / 2 + 8
+BASE_RX = 250
+BASE_RY = 148
+SAMPLES = 108
 
 SECTOR_COLORS = {
     1: "#E10600",
@@ -22,119 +24,265 @@ SECTOR_COLORS = {
     3: "#00B050",
 }
 
+SECTOR_TEXT = {
+    1: "#FFFFFF",
+    2: "#0A0A0A",
+    3: "#0A0A0A",
+}
 
-def _seeded_points(name: str, n: int) -> list[tuple[float, float]]:
+
+def _radial_points(name: str, samples: int = SAMPLES) -> list[tuple[float, float]]:
+    """Curva cerrada suave: r(theta) = 1 + suma de armonicos."""
     rng = random.Random(name)
+    rx = BASE_RX * rng.uniform(0.90, 1.0)
+    ry = BASE_RY * rng.uniform(0.86, 1.0)
+    harmonics = []
+    for k in (2, 3, 4, 5, 6):
+        amp = rng.uniform(0.03, 0.13) / (k / 3)
+        phase = rng.uniform(0, 2 * math.pi)
+        harmonics.append((amp, phase, k))
+
     pts: list[tuple[float, float]] = []
-    for i in range(n):
-        angle = (i / n) * 2 * math.pi + rng.uniform(-0.15, 0.15)
-        rx = BASE_RX * rng.uniform(0.55, 1.05)
-        ry = BASE_RY * rng.uniform(0.45, 0.95)
-        x = CX + rx * math.cos(angle)
-        y = CY + ry * math.sin(angle)
+    for i in range(samples):
+        theta = 2 * math.pi * i / samples
+        r = 1.0
+        for amp, phase, k in harmonics:
+            r += amp * math.sin(k * theta + phase)
+        x = CX + rx * r * math.cos(theta)
+        y = CY + ry * r * math.sin(theta)
         pts.append((x, y))
     return pts
 
 
-def _closed_smooth_path(pts: list[tuple[float, float]]) -> str:
+def _poly_path(pts: list[tuple[float, float]]) -> str:
+    if not pts:
+        return ""
+    cmds = [f"M {pts[0][0]:.1f} {pts[0][1]:.1f}"]
+    for x, y in pts[1:]:
+        cmds.append(f"L {x:.1f} {y:.1f}")
+    return " ".join(cmds)
+
+
+def _sector_paths(pts: list[tuple[float, float]]) -> list[tuple[str, str]]:
+    """Divide la curva cerrada en 3 tramos continuos (S1, S2, S3)."""
     n = len(pts)
-    cmds: list[str] = [f"M {pts[0][0]:.1f} {pts[0][1]:.1f}"]
+    if n < 6:
+        return []
+    cuts = [0, round(n / 3), round(2 * n / 3), n]
+    segments: list[tuple[str, str]] = []
+    for i in range(3):
+        start = cuts[i]
+        end = cuts[i + 1]
+        chunk = pts[start:end + 1] if end < n else pts[start:] + [pts[0]]
+        if len(chunk) < 2:
+            continue
+        segments.append((_poly_path(chunk), SECTOR_COLORS[i + 1]))
+    return segments
+
+
+def _curvature(pts: list[tuple[float, float]]) -> list[float]:
+    """Cambio de angulo entre segmentos consecutivos (proxy de curvatura)."""
+    n = len(pts)
+    out: list[float] = []
     for i in range(n):
         p0 = pts[(i - 1) % n]
         p1 = pts[i]
         p2 = pts[(i + 1) % n]
-        p3 = pts[(i + 2) % n]
-        c1x = p1[0] + (p2[0] - p0[0]) / 6
-        c1y = p1[1] + (p2[1] - p0[1]) / 6
-        c2x = p2[0] - (p3[0] - p1[0]) / 6
-        c2y = p2[1] - (p3[1] - p1[1]) / 6
-        cmds.append(f"C {c1x:.1f} {c1y:.1f} {c2x:.1f} {c2y:.1f} {p2[0]:.1f} {p2[1]:.1f}")
-    cmds.append("Z")
-    return " ".join(cmds)
-
-
-def _path_lengths(pts: list[tuple[float, float]]) -> list[float]:
-    out = [0.0]
-    total = 0.0
-    for i in range(len(pts)):
-        a = pts[i]
-        b = pts[(i + 1) % len(pts)]
-        total += math.hypot(b[0] - a[0], b[1] - a[1])
-        out.append(total)
+        a1 = math.atan2(p1[1] - p0[1], p1[0] - p0[0])
+        a2 = math.atan2(p2[1] - p1[1], p2[0] - p1[0])
+        delta = (a2 - a1 + math.pi) % (2 * math.pi) - math.pi
+        out.append(abs(delta))
     return out
 
 
-def _point_at_fraction(pts: list[tuple[float, float]], lengths: list[float], frac: float) -> tuple[float, float]:
-    target = lengths[-1] * frac
-    for i in range(len(pts)):
-        a = pts[i]
-        b = pts[(i + 1) % len(pts)]
-        seg_len = lengths[i + 1] - lengths[i]
-        if lengths[i] <= target <= lengths[i + 1] and seg_len > 0:
-            t = (target - lengths[i]) / seg_len
-            return (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
-    return pts[0]
+def detect_corners(pts: list[tuple[float, float]], min_angle: float = 0.05, min_gap: int = 4) -> list[int]:
+    """Devuelve los indices de los puntos de mayor curvatura (curvas)."""
+    n = len(pts)
+    curv = _curvature(pts)
+    picked: list[tuple[int, float]] = []
+    for i in range(n):
+        if curv[i] < min_angle:
+            continue
+        window = [curv[(i + k) % n] for k in range(-min_gap, min_gap + 1)]
+        if curv[i] >= max(window):
+            picked.append((i, curv[i]))
+
+    # Separacion minima entre curvas
+    picked.sort(key=lambda x: -x[1])
+    chosen: list[int] = []
+    for idx, _ in picked:
+        if all(min((idx - c) % n, (c - idx) % n) >= min_gap for c in chosen):
+            chosen.append(idx)
+        if len(chosen) >= 16:
+            break
+    return sorted(chosen)
 
 
-def generate_circuit_svg(circuit_name: str) -> str:
-    n_points = max(6, min(12, sum(ord(c) for c in circuit_name) % 5 + 8))
-    pts = _seeded_points(circuit_name, n_points)
-    full_path = _closed_smooth_path(pts)
-    lengths = _path_lengths(pts)
+CORNER_COLOR = "#2E90FF"
 
-    p_start = pts[0]
-    p_s1 = _point_at_fraction(pts, lengths, 1 / 3)
-    p_s2 = _point_at_fraction(pts, lengths, 2 / 3)
 
-    sector_marks = ""
-    for idx, (pos, label) in enumerate([(p_start, "S/F"), (p_s1, "S1"), (p_s2, "S2")], start=1):
-        color = "#FFFFFF" if label == "S/F" else SECTOR_COLORS.get(idx, "#E10600")
-        sector_marks += (
-            f'<g class="circuit-marker">'
-            f'<circle cx="{pos[0]:.1f}" cy="{pos[1]:.1f}" r="14" fill="{color}" stroke="#0A0A0A" stroke-width="2"/>'
-            f'<text x="{pos[0]:.1f}" y="{pos[1]:.1f}" text-anchor="middle" dominant-baseline="central" '
-            f'font-family="JetBrains Mono, monospace" font-size="10" font-weight="800" fill="#0A0A0A">{label}</text>'
-            f'</g>'
+def _outward(pos: tuple[float, float], offset: float = 20.0) -> tuple[float, float]:
+    dx = pos[0] - CX
+    dy = pos[1] - CY
+    norm = math.hypot(dx, dy) or 1.0
+    return (pos[0] + dx / norm * offset, pos[1] + dy / norm * offset)
+
+
+def _corner_label(pos: tuple[float, float], number: int) -> str:
+    x, y = _outward(pos, 19.0)
+    return (
+        f'<g class="corner-tag">'
+        f'<circle cx="{x:.1f}" cy="{y:.1f}" r="8.5" fill="#0A0A0F" opacity="0.65"/>'
+        f'<circle cx="{x:.1f}" cy="{y:.1f}" r="7.5" fill="{CORNER_COLOR}" stroke="#08131F" stroke-width="1.2"/>'
+        f'<text x="{x:.1f}" y="{y + 0.5:.1f}" text-anchor="middle" dominant-baseline="central" '
+        f'font-family="JetBrains Mono, monospace" font-size="8" font-weight="800" fill="#FFFFFF">{number}</text>'
+        f'</g>'
+    )
+
+
+def _marker(pos: tuple[float, float], label: str, fill: str, text_fill: str, radius: int = 16) -> str:
+    x, y = pos
+    return (
+        f'<g class="circuit-marker">'
+        f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{radius + 4}" fill="#0A0A0A" opacity="0.75"/>'
+        f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{radius}" fill="{fill}" stroke="#0A0A0A" stroke-width="2.5"/>'
+        f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{radius - 4}" fill="none" '
+        f'stroke="#FFFFFF" stroke-width="1" opacity="0.25"/>'
+        f'<text x="{x:.1f}" y="{y + 0.5:.1f}" text-anchor="middle" dominant-baseline="central" '
+        f'font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="800" '
+        f'letter-spacing="-0.3" fill="{text_fill}">{label}</text>'
+        f'</g>'
+    )
+
+
+def _legend(show_corners: bool = False, corner_count: int = 0) -> str:
+    items: list[tuple[str, str, str]] = [
+        ("circle", SECTOR_COLORS[1], "Sector 1"),
+        ("circle", SECTOR_COLORS[2], "Sector 2"),
+        ("circle", SECTOR_COLORS[3], "Sector 3"),
+        ("circle", "#FFFFFF", "Meta / Salida"),
+    ]
+    if show_corners:
+        items.append(("corner", CORNER_COLOR, f"Curvas ({corner_count})"))
+
+    item_w = 118
+    box_h = 30
+    gap = 6
+    pad = 12
+    total_w = item_w * len(items) + gap * (len(items) - 1) + pad * 2
+    left = (W - total_w) / 2
+    top = H - 46
+
+    body = ""
+    for i, (kind, color, label) in enumerate(items):
+        x = left + pad + i * (item_w + gap)
+        cy = top + box_h / 2
+        if kind == "corner":
+            body += (
+                f'<circle cx="{x + 7}" cy="{cy}" r="7" fill="{color}" stroke="#08131F" stroke-width="1.2"/>'
+                f'<text x="{x + 7}" y="{cy + 0.5}" text-anchor="middle" dominant-baseline="central" '
+                f'font-family="JetBrains Mono, monospace" font-size="7.5" font-weight="800" fill="#FFFFFF">1</text>'
+            )
+            tx = x + 19
+        else:
+            body += (
+                f'<circle cx="{x + 7}" cy="{cy}" r="7" fill="{color}" stroke="#0A0A0A" stroke-width="1.5"/>'
+            )
+            tx = x + 19
+        body += (
+            f'<text x="{tx}" y="{cy + 3.5:.1f}" font-family="Chivo, sans-serif" '
+            f'font-size="10.5" font-weight="700" fill="#E8E8EE">{label}</text>'
         )
 
-    s3_pos = _point_at_fraction(pts, lengths, 0.92)
-    sector_marks += (
-        f'<g class="circuit-marker-s3">'
-        f'<circle cx="{s3_pos[0]:.1f}" cy="{s3_pos[1]:.1f}" r="14" fill="{SECTOR_COLORS[3]}" stroke="#0A0A0A" stroke-width="2"/>'
-        f'<text x="{s3_pos[0]:.1f}" y="{s3_pos[1]:.1f}" text-anchor="middle" dominant-baseline="central" '
-        f'font-family="JetBrains Mono, monospace" font-size="10" font-weight="800" fill="#0A0A0A">S3</text>'
+    return (
+        f'<g class="circuit-legend">'
+        f'<rect x="{left:.1f}" y="{top}" width="{total_w}" height="{box_h}" rx="6" '
+        f'fill="#101018" stroke="#2A2A35" stroke-width="1"/>'
+        f'{body}'
         f'</g>'
     )
 
-    legend = (
-        f'<g class="circuit-legend" transform="translate(20, {H - 56})">'
-        f'<rect width="180" height="44" rx="4" fill="#15151E" stroke="#1F1F1F" stroke-width="1"/>'
-        f'<circle cx="14" cy="14" r="6" fill="{SECTOR_COLORS[1]}"/>'
-        f'<text x="26" y="18" font-family="Chivo, sans-serif" font-size="10" font-weight="700" fill="#FFFFFF">Sector 1</text>'
-        f'<circle cx="14" cy="32" r="6" fill="{SECTOR_COLORS[2]}"/>'
-        f'<text x="26" y="36" font-family="Chivo, sans-serif" font-size="10" font-weight="700" fill="#FFFFFF">Sector 2</text>'
-        f'<circle cx="100" cy="14" r="6" fill="{SECTOR_COLORS[3]}"/>'
-        f'<text x="112" y="18" font-family="Chivo, sans-serif" font-size="10" font-weight="700" fill="#FFFFFF">Sector 3</text>'
-        f'<circle cx="100" cy="32" r="6" fill="#FFFFFF"/>'
-        f'<text x="112" y="36" font-family="Chivo, sans-serif" font-size="10" font-weight="700" fill="#FFFFFF">Start/Finish</text>'
-        f'</g>'
+
+def generate_circuit_svg(
+    circuit_name: str,
+    subtitle: str = "",
+    show_corners: bool = False,
+    dim_sectors: set[str] | None = None,
+    seed: str | None = None,
+) -> str:
+    # `circuit_name` es el texto visible; `seed` define la geometria (estable
+    # aunque cambie el nombre mostrado, ej. alias vs nombre oficial de la API).
+    pts = _radial_points(seed or circuit_name)
+    full = _poly_path(pts) + " Z"
+    dim_sectors = dim_sectors or set()
+
+    sector_labels = {"S1": 1, "S2": 2, "S3": 3}
+    sectors = "".join(
+        f'<path d="{d}" fill="none" '
+        f'stroke="{"#3A3A45" if any(sector_labels[s] == i + 1 for s in dim_sectors) else color}" '
+        f'stroke-width="24" stroke-linejoin="round" stroke-linecap="round"/>'
+        for i, (d, color) in enumerate(_sector_paths(pts))
     )
+
+    n = len(pts)
+    idx_s1 = round(n / 6)
+    idx_s2 = round(3 * n / 6)
+    idx_s3 = round(5 * n / 6)
+
+    def _sector_fill(key: str, default: str) -> str:
+        return "#3A3A45" if key in dim_sectors else default
+
+    marks = (
+        _marker(pts[idx_s1], "S1", _sector_fill("S1", SECTOR_COLORS[1]), SECTOR_TEXT[1])
+        + _marker(pts[idx_s2], "S2", _sector_fill("S2", SECTOR_COLORS[2]), SECTOR_TEXT[2])
+        + _marker(pts[idx_s3], "S3", _sector_fill("S3", SECTOR_COLORS[3]), SECTOR_TEXT[3])
+        + _marker(pts[0], "S/F", "#FFFFFF", "#0A0A0A")
+    )
+
+    corner_idx = detect_corners(pts)
+    corner_marks = ""
+    if show_corners:
+        corner_marks = "".join(
+            _corner_label(pts[i], k + 1) for k, i in enumerate(corner_idx)
+        )
 
     title = (
-        f'<text x="{CX}" y="32" text-anchor="middle" '
-        f'font-family="Chivo, sans-serif" font-size="16" font-weight="900" '
-        f'fill="#FFFFFF" letter-spacing="2">{circuit_name.upper()}</text>'
+        f'<text x="{CX}" y="36" text-anchor="middle" '
+        f'font-family="Chivo, sans-serif" font-size="18" font-weight="900" '
+        f'fill="#FFFFFF" letter-spacing="1.5">{circuit_name.upper()}</text>'
+    )
+    sub = (
+        f'<text x="{CX}" y="55" text-anchor="middle" '
+        f'font-family="JetBrains Mono, monospace" font-size="10" font-weight="600" '
+        f'fill="#8A92A6" letter-spacing="1.5">{subtitle.upper()}</text>'
+        if subtitle
+        else ""
     )
 
     return (
         f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" '
         f'preserveAspectRatio="xMidYMid meet">'
-        f'<rect width="{W}" height="{H}" fill="#0A0A0A" rx="6"/>'
-        f'<rect x="0" y="0" width="{W}" height="6" fill="#E10600"/>'
-        f'{title}'
-        f'<path d="{full_path}" fill="none" stroke="#2D2D35" stroke-width="22" stroke-linejoin="round" stroke-linecap="round"/>'
-        f'<path d="{full_path}" fill="none" stroke="#C0C0C0" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>'
-        f'{sector_marks}'
-        f'{legend}'
+        f'<defs>'
+        f'<radialGradient id="trackBg" cx="50%" cy="45%" r="70%">'
+        f'<stop offset="0%" stop-color="#14141C"/>'
+        f'<stop offset="100%" stop-color="#0A0A0F"/>'
+        f'</radialGradient>'
+        f'<filter id="trackShadow" x="-20%" y="-20%" width="140%" height="140%">'
+        f'<feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#000000" flood-opacity="0.6"/>'
+        f'</filter>'
+        f'</defs>'
+        f'<rect width="{W}" height="{H}" fill="url(#trackBg)" rx="8"/>'
+        f'<rect x="0" y="0" width="{W}" height="5" fill="#E10600" rx="2"/>'
+        f'{title}{sub}'
+        f'<g filter="url(#trackShadow)">'
+        f'<path d="{full}" fill="none" stroke="#050507" stroke-width="30" '
+        f'stroke-linejoin="round" stroke-linecap="round"/>'
+        f'{sectors}'
+        f'</g>'
+        f'<path d="{full}" fill="none" stroke="#0A0A0A" stroke-width="2" '
+        f'stroke-linejoin="round" stroke-linecap="round" opacity="0.45"/>'
+        f'{corner_marks}'
+        f'{marks}'
+        f'{_legend(show_corners=show_corners, corner_count=len(corner_idx))}'
         f'</svg>'
     )

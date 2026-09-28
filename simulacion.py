@@ -23,7 +23,6 @@ class Compound:
     cliff_drop: float
     min_stint: int
 
-
 @dataclass(frozen=True)
 class Circuit:
     name: str
@@ -34,7 +33,6 @@ class Circuit:
     safety_car_prob: float
     notes: str
     typical_laps: int = 58
-
 
 @dataclass(frozen=True)
 class Strategy:
@@ -88,8 +86,11 @@ CIRCUITS: dict[str, Circuit] = {
     "Baku": Circuit("Baku", 103.0, 22.0, 0.95, 0.60, 0.20, "Alta SC, muros cerca.", 51),
     "Marina Bay": Circuit("Marina Bay", 95.0, 23.0, 1.05, 0.85, 0.25, "Nocturna, alta SC.", 62),
     "COTA": Circuit("COTA", 95.0, 20.0, 1.05, 0.65, 0.10, "Mix completo, variedad de estrategias.", 56),
-    "Mexico City": Circuit("Mexico City", 78.0, 21.0, 1.00, 0.60, 0.12, "Altitud, motor manda.", 71),
     "Madrid": Circuit("Madrid", 80.0, 20.5, 1.05, 0.75, 0.12, "Nuevo trazado urbano Madring, semi-estrecho.", 66),
+    "Madrid": Circuit("Madrid", 80.0, 20.5, 1.05, 0.75, 0.12, "Nuevo trazado urbano Madring, semi-estrecho.", 66),
+    "Madrid": Circuit("Madrid", 80.0, 20.5, 1.05, 0.75, 0.12, "Nuevo trazado urbano Madring, semi-estrecho.", 66),
+    "Sepang": Circuit("Sepang", 94.0, 21.0, 1.10, 0.55, 0.15, "Calor y humedad, alta degradacion.", 56),
+    "Mexico City": Circuit("Mexico City", 78.0, 21.0, 1.00, 0.60, 0.12, "Altitud, motor manda.", 71),
     "Interlagos": Circuit("Interlagos", 71.0, 22.0, 1.05, 0.50, 0.22, "Variable, SC probable.", 71),
     "Las Vegas": Circuit("Las Vegas", 84.0, 21.0, 0.95, 0.60, 0.10, "Rectas larguisimas.", 50),
     "Abu Dhabi": Circuit("Abu Dhabi", 87.0, 21.0, 1.00, 0.60, 0.08, "Cierre de temporada.", 58),

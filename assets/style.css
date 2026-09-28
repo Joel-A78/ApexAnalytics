@@ -332,144 +332,379 @@ html, body, [data-testid="stAppViewContainer"] {
 
 /* ----- Weather card (Raceweek) ----- */
 .weather-card {
-    background: linear-gradient(135deg, rgba(0, 229, 255, 0.08) 0%, transparent 60%), var(--neutral-soft);
-    border: 1px solid var(--neutral-line);
-    border-left: 5px solid #00E5FF;
-    border-radius: 6px;
-    padding: 1rem 1.2rem;
+    background:
+        radial-gradient(120% 100% at 0% 0%, rgba(0, 229, 255, 0.14) 0%, transparent 55%),
+        linear-gradient(160deg, #1A1F2A 0%, #10141C 100%);
+    border: 1px solid rgba(0, 229, 255, 0.22);
+    border-radius: 10px;
+    padding: 1.1rem 1.25rem 1.15rem;
     height: 100%;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
-.weather-card .wx-header {
+.weather-card .wx-head {
     display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.weather-card .wx-head-eyebrow {
+    color: #00E5FF;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.45rem;
+    background: rgba(0, 229, 255, 0.12);
+    border: 1px solid rgba(0, 229, 255, 0.30);
+    border-radius: 3px;
+}
+
+.weather-card .wx-head-place {
+    color: var(--white-soft);
+    font-family: "Chivo", sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.weather-card .wx-main {
+    display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: flex-start;
     gap: 1rem;
-    padding-bottom: 0.8rem;
-    border-bottom: 1px solid var(--neutral-line);
+    padding: 0.9rem 0 0.85rem;
 }
 
 .weather-card .wx-now {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.25rem;
+    gap: 0.75rem;
 }
 
 .weather-card .wx-icon {
-    font-size: 2.4rem;
+    font-size: 2.9rem;
     line-height: 1;
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
+}
+
+.weather-card .wx-now-text {
+    display: flex;
+    flex-direction: column;
 }
 
 .weather-card .wx-temp {
     color: var(--white);
     font-family: "JetBrains Mono", monospace;
-    font-size: 2.2rem;
+    font-size: 2.4rem;
     font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+
+.weather-card .wx-temp small {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--white-soft);
+    margin-left: 0.1rem;
 }
 
 .weather-card .wx-desc {
     color: var(--white-soft);
-    font-size: 0.85rem;
-    margin-top: 0.2rem;
+    font-family: "Chivo", sans-serif;
+    font-size: 0.82rem;
+    margin-top: 0.3rem;
 }
 
 .weather-card .wx-wind {
-    text-align: right;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.7rem;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+}
+
+.weather-card .wx-wind-icon {
+    font-size: 1.1rem;
+    opacity: 0.85;
 }
 
 .weather-card .wx-wind-val {
     color: var(--white);
     font-family: "JetBrains Mono", monospace;
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: 0.92rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.weather-card .wx-wind-val small {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--muted);
 }
 
 .weather-card .wx-wind-dir {
     color: var(--muted);
     font-family: "JetBrains Mono", monospace;
-    font-size: 0.7rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.05em;
+    margin-top: 0.1rem;
+}
+
+.weather-card .wx-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+    padding-top: 0.85rem;
     margin-top: 0.15rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.weather-card .wx-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.5rem 0.55rem;
+    background: rgba(0, 0, 0, 0.32);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 7px;
+}
+
+.weather-card .wx-stat-label {
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.weather-card .wx-stat-value {
+    color: var(--white);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.82rem;
+    font-weight: 800;
+    line-height: 1.15;
+}
+
+.weather-card .wx-outlook {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.7rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: rgba(0, 0, 0, 0.34);
+}
+
+.weather-card .wx-outlook-icon {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.weather-card .wx-outlook-title {
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.weather-card .wx-outlook-note {
+    color: var(--white);
+    font-family: "Chivo", sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-top: 0.1rem;
+}
+
+.weather-card .wx-outlook-track {
+    margin-left: auto;
+    text-align: right;
+    padding-left: 0.6rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.weather-card .wx-outlook-track-label {
+    display: block;
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.weather-card .wx-outlook-track-value {
+    color: var(--white);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.9rem;
+    font-weight: 800;
+}
+
+.weather-card .wx-outlook-dry {
+    border-color: rgba(0, 176, 80, 0.45);
+    background: rgba(0, 176, 80, 0.10);
+}
+
+.weather-card .wx-outlook-mixed {
+    border-color: rgba(255, 213, 0, 0.45);
+    background: rgba(255, 213, 0, 0.10);
+}
+
+.weather-card .wx-outlook-wet {
+    border-color: rgba(46, 144, 255, 0.50);
+    background: rgba(46, 144, 255, 0.12);
+}
+
+.weather-card .wx-forecast-label {
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 0.45rem;
 }
 
 .weather-card .wx-forecast {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 0.5rem;
-    padding-top: 0.7rem;
 }
 
 .weather-card .wx-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
     text-align: center;
-    background: rgba(0, 0, 0, 0.45);
-    border: 1px solid var(--neutral-line);
-    border-radius: 4px;
-    padding: 0.5rem 0.4rem;
+    background: rgba(0, 0, 0, 0.38);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 0.6rem 0.35rem 0.55rem;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.weather-card .wx-day:hover {
+    border-color: rgba(0, 229, 255, 0.35);
+    transform: translateY(-2px);
 }
 
 .weather-card .wx-day-label {
-    color: var(--secondary);
+    color: #00E5FF;
     font-family: "JetBrains Mono", monospace;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
+}
+
+.weather-card .wx-day-icon {
+    font-size: 1.35rem;
+    line-height: 1;
+    margin: 0.1rem 0;
 }
 
 .weather-card .wx-day-temps {
     color: var(--white);
     font-family: "JetBrains Mono", monospace;
-    font-size: 0.95rem;
-    font-weight: 700;
-    margin-top: 0.2rem;
+    font-size: 0.92rem;
+    font-weight: 800;
+}
+
+.weather-card .wx-day-temps span {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.78rem;
 }
 
 .weather-card .wx-day-pop {
     color: var(--muted);
     font-family: "JetBrains Mono", monospace;
-    font-size: 0.65rem;
-    margin-top: 0.15rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.03em;
 }
 
-/* ----- Circuit map card (Raceweek) ----- */
-.circuit-card {
-    background: var(--neutral-soft);
-    border: 1px solid var(--neutral-line);
-    border-left: 5px solid var(--primary);
-    border-radius: 6px;
-    padding: 1rem 1.2rem;
+/* Stretch weather column so the card matches the circuit map height */
+[data-testid="stColumn"]:has(.weather-card) {
+    display: flex;
+    flex-direction: column;
+}
+
+[data-testid="stColumn"]:has(.weather-card) > [data-testid="stVerticalBlock"] {
+    flex: 1;
     height: 100%;
 }
 
-.circuit-card .circuit-coords {
+[data-testid="stColumn"]:has(.weather-card) > [data-testid="stVerticalBlock"] > [data-testid="stElementContainer"] {
+    flex: 1;
+    display: flex;
+}
+
+[data-testid="stColumn"]:has(.weather-card) [data-testid="stMarkdownContainer"] {
+    flex: 1;
+}
+
+.weather-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.weather-card .wx-forecast {
+    margin-top: auto;
+}
+
+/* ----- Circuit map card (Raceweek) ----- */
+.circuit-coords {
     display: flex;
     flex-direction: column;
     gap: 0.15rem;
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.7rem;
     padding-bottom: 0.6rem;
     border-bottom: 1px solid var(--neutral-line);
 }
 
-.circuit-card .circuit-name {
+.circuit-coords .circuit-name {
     color: var(--white);
     font-family: "Chivo", sans-serif;
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 0.02em;
+    line-height: 1.15;
 }
 
-.circuit-card .circuit-place {
+.circuit-coords .circuit-place {
     color: var(--muted);
     font-family: "JetBrains Mono", monospace;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
+}
+
+.circuit-card {
+    background: linear-gradient(160deg, #12121A 0%, #0A0A0F 100%);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 10px;
+    padding: 0.75rem;
+    margin-top: 0.6rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .circuit-card svg {
     width: 100%;
     height: auto;
     display: block;
-    border-radius: 4px;
+    border-radius: 8px;
 }
 
 /* ----- Mode toggle (Historial) ----- */
@@ -608,18 +843,32 @@ html, body, [data-testid="stAppViewContainer"] {
     border: 1px solid var(--neutral-line);
     border-top: 3px solid var(--primary);
     border-radius: 6px;
-    padding: 0.7rem 0.9rem;
+    padding: 0.8rem 0.95rem;
+    min-height: 5.5rem;
 }
 
 [data-testid="stMetricValue"] {
     color: var(--white);
-    font-family: "JetBrains Mono", monospace;
+    font-family: "JetBrains Mono", "Consolas", monospace;
     font-weight: 700;
+    font-size: 1.55rem;
+    line-height: 1.25;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 [data-testid="stMetricLabel"] {
     color: var(--muted);
     font-family: "JetBrains Mono", monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+[data-testid="stMetricDelta"] {
+    color: var(--secondary);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.78rem;
 }
 
 [data-testid="stMetricDelta"] svg { display: none; }
@@ -855,9 +1104,430 @@ p, li, label, span, div {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
+/* ----- Season calendar timeline (Raceweek) ----- */
+.season-calendar {
+    display: flex;
+    flex-direction: row;
+    gap: 0.6rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.5rem 0.25rem 0.75rem 0.25rem;
+    margin-top: 0.5rem;
+    scroll-snap-type: x proximity;
+    scrollbar-color: var(--primary) transparent;
+    scrollbar-width: thin;
+}
+
+.season-calendar::-webkit-scrollbar {
+    height: 6px;
+}
+
+.season-calendar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 3px;
+}
+
+.season-calendar::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 3px;
+}
+
+.cal-card {
+    flex: 0 0 175px;
+    background: var(--neutral-soft);
+    border: 1px solid var(--neutral-line);
+    border-top: 3px solid var(--neutral-line);
+    border-radius: 6px;
+    padding: 0.7rem 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    scroll-snap-align: start;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+    position: relative;
+}
+
+.cal-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.cal-card-past {
+    opacity: 0.5;
+    border-top-color: var(--neutral-line);
+}
+
+.cal-card-upcoming {
+    border-top-color: var(--secondary);
+}
+
+.cal-card-next {
+    border-top-color: var(--primary);
+    background: linear-gradient(180deg, rgba(225, 6, 0, 0.15) 0%, transparent 80%), var(--neutral-soft);
+    box-shadow: 0 0 0 1px rgba(225, 6, 0, 0.35), 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+
+.cal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cal-round {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--primary);
+    background: rgba(225, 6, 0, 0.12);
+    border: 1px solid rgba(225, 6, 0, 0.25);
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+}
+
+.cal-card-past .cal-round {
+    color: var(--muted);
+    background: rgba(110, 110, 122, 0.12);
+    border-color: rgba(110, 110, 122, 0.25);
+}
+
+.cal-card-upcoming .cal-round {
+    color: var(--secondary);
+    background: rgba(0, 229, 255, 0.12);
+    border-color: rgba(0, 229, 255, 0.30);
+}
+
+.cal-flag {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.55rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+}
+
+.cal-flag-next {
+    background: var(--primary);
+    color: var(--white);
+    animation: f1-pulse 1.6s ease-in-out infinite;
+}
+
+.cal-flag-past {
+    background: rgba(110, 110, 122, 0.25);
+    color: var(--muted);
+}
+
+.cal-name {
+    color: var(--white);
+    font-family: "Chivo", sans-serif;
+    font-size: 0.92rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    line-height: 1.15;
+    margin-top: 0.15rem;
+}
+
+.cal-circuit {
+    color: var(--white-soft);
+    font-family: "Chivo", sans-serif;
+    font-size: 0.74rem;
+    line-height: 1.2;
+}
+
+.cal-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.4rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid var(--neutral-line);
+}
+
+.cal-country {
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.cal-dates {
+    color: var(--white);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.cal-card-next .cal-dates {
+    color: var(--primary);
+}
+
+.cal-flag-wrap {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* ----- Credits footer ----- */
+.credits-footer {
+    position: relative;
+    width: 100%;
+    margin-top: 1.25rem;
+    padding: 1rem 0 0.75rem;
+    background: transparent;
+}
+
+.credits-footer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 100vw;
+    height: 2px;
+    background: var(--primary);
+    transform: translateX(-50%);
+}
+
+.credits-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--neutral-line);
+}
+
+.credits-project {
+    color: var(--white);
+    font-family: "Chivo", sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.credits-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    padding: 1rem 0 0.8rem;
+}
+
+.credits-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
+    color: var(--white-soft);
+    font-size: 0.75rem;
+    line-height: 1.35;
+}
+
+.credits-label {
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.credits-item a {
+    color: var(--secondary);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.credits-item a:hover,
+.credits-item a:focus-visible {
+    color: var(--white);
+    text-decoration: underline;
+}
+
+.institution-links {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.institution-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    height: 1.5rem;
+    padding: 0 0.45rem;
+    border: 1px solid currentColor;
+    color: var(--white);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.03em;
+    line-height: 1;
+    text-decoration: none !important;
+}
+
+.institution-logo {
+    display: block;
+    width: auto;
+    height: 1.5rem;
+    max-width: 5.5rem;
+    object-fit: contain;
+}
+
+.institution-links > a {
+    display: inline-flex;
+    align-items: center;
+}
+
+.fia-mark {
+    color: var(--secondary) !important;
+    font-style: italic;
+}
+
+.f1-mark {
+    color: var(--primary) !important;
+    transform: skew(-12deg);
+}
+
+.credits-note {
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.62rem;
+    line-height: 1.4;
+}
+
+/* ----- Season results ----- */
+.season-race-banner {
+    margin: 1rem 0 1.25rem;
+    padding: 1rem 1.1rem;
+    background: linear-gradient(135deg, var(--primary-soft), var(--neutral-soft));
+    border-left: 4px solid var(--primary);
+    border-top: 1px solid var(--neutral-line);
+    border-right: 1px solid var(--neutral-line);
+    border-bottom: 1px solid var(--neutral-line);
+}
+
+.season-race-name {
+    margin-top: 0.3rem;
+    color: var(--white);
+    font-family: "Chivo", sans-serif;
+    font-size: 1.25rem;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.season-race-meta {
+    margin-top: 0.2rem;
+    color: var(--white-soft);
+    font-size: 0.8rem;
+}
+
+/* ----- Interest bar (footer KPI) ----- */
+.interest-bar {
+    margin-top: 0.9rem;
+    padding: 1rem 1.25rem;
+    background: rgba(35, 38, 45, 0.95);
+    border: 1px solid var(--neutral-line);
+    border-left: 5px solid var(--secondary);
+    border-radius: 6px;
+}
+
+.interest-bar .interest-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.interest-bar .interest-note {
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.interest-bar .interest-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.6rem;
+    margin-top: 0.75rem;
+}
+
+.interest-bar .interest-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.55rem 0.7rem;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--neutral-line);
+    border-radius: 4px;
+}
+
+.interest-bar .interest-value {
+    color: var(--white);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.interest-bar .interest-label {
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.interest-bar .interest-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+}
+
+.interest-bar .interest-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.25rem 0.6rem;
+    background: rgba(0, 229, 255, 0.10);
+    border: 1px solid rgba(0, 229, 255, 0.28);
+    border-radius: 999px;
+}
+
+.interest-bar .interest-chip-name {
+    color: var(--white);
+    font-family: "Chivo", sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.interest-bar .interest-chip-count {
+    color: var(--secondary);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.interest-bar .interest-empty {
+    color: var(--muted);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.72rem;
+}
+
 /* ----- Mobile ----- */
 @media (max-width: 700px) {
     .block-container { padding: 1rem 0.75rem 2rem; }
     .race-card { padding: 0.85rem 0.9rem; }
     .command-header { padding: 1.1rem 1.25rem; }
+    .cal-card { flex: 0 0 155px; }
+    .credits-heading { align-items: flex-start; flex-direction: column; gap: 0.35rem; }
+    .credits-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.9rem 0.7rem; }
+    .interest-bar .interest-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

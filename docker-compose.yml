@@ -1,11 +1,11 @@
 version: '3.8'
 
 services:
-  motorpulse:
+  apexanalytics:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: motorpulse-app
+    container_name: apexanalytics-app
     ports:
       - "8501:8501"
     environment:

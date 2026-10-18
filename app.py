@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import json
 import urllib.request
 from datetime import date, datetime, timedelta, timezone
@@ -13,17 +14,28 @@ import plotly.graph_objects as go
 import streamlit as st
 
 import simulacion as sim
-import openf1
+import historial
 import prediccion
 
 st.set_page_config(
     page_title="Apex Analytics · F1",
     layout="wide",
-    page_icon="C:\\Users\\djate\\Downloads\\Car project\\assets\\media\\ApexAnalytics-logo-icono.ico"
+    page_icon="assets/media/apex-icon.png",
 )
 
 with open("assets/style.css", "r", encoding="utf-8") as _css_file:
     st.markdown(f"<style>{_css_file.read()}</style>", unsafe_allow_html=True)
+
+try:
+    with open("assets/media/apex-icon.ico", "rb") as _ico_file:
+        _favicon_b64 = base64.b64encode(_ico_file.read()).decode("ascii")
+    st.markdown(
+        f'<link rel="icon" type="image/x-icon" '
+        f'href="data:image/x-icon;base64,{_favicon_b64}">',
+        unsafe_allow_html=True,
+    )
+except OSError:
+    pass
 
 try:
     LOCAL_TZ = ZoneInfo("America/Tijuana")
@@ -86,6 +98,11 @@ def render_sidebar() -> str:
             unsafe_allow_html=True,
         )
 
+        st.markdown(
+            '<div class="nav-eyebrow"><span>Secciones</span></div>',
+            unsafe_allow_html=True,
+        )
+
         section = st.radio(
             "Secciones",
             options=["overview", "season", "prediction", "telemetry"],
@@ -96,9 +113,10 @@ def render_sidebar() -> str:
                 "telemetry": "Historial",
             }[s],
             label_visibility="collapsed",
+            key="nav_section",
         )
 
-        st.markdown("---")
+        st.markdown('<div class="nav-divider"></div>', unsafe_allow_html=True)
         now = datetime.now(LOCAL_TZ)
         st.caption(f"Formula 1 · 2026 · {now.strftime('%H:%M')} America/Tijuana")
         st.caption("Data drives victory.")
@@ -182,7 +200,10 @@ def render_credits_footer() -> None:
                         </div>
                         <div class="credits-item">
                             <span class="credits-label">Telemetria y stints</span>
-                            <a href="https://openf1.org/" target="_blank" rel="noopener noreferrer">OpenF1 API</a>
+                            <span class="institution-links">
+                                <a href="https://openf1.org/" target="_blank" rel="noopener noreferrer">OpenF1 API</a>
+                                <span class="credits-alt">respaldo: Jolpica (tiempos de vuelta y paradas)</span>
+                            </span>
                         </div>
                         <div class="credits-item">
                             <span class="credits-label">Clima</span>
@@ -247,14 +268,6 @@ def _section_label(key: str) -> str:
         "telemetry": "Historial",
         "model": "Modelo",
     }.get(key, key)
-
-
-def render_placeholder(title: str, subtitle: str, ideas: list[str]) -> None:
-    render_header(title, subtitle)
-    st.info("Esta vista es un placeholder. Aun no hay datos cargados.")
-    st.markdown("### Siguientes pasos")
-    for idea in ideas:
-        st.markdown(f"- {idea}")
 
 
 def current_week_range(today: date | None = None) -> tuple[date, date]:
@@ -481,10 +494,17 @@ def _render_calendar_card(row: dict[str, Any]) -> str:
     elif status == "past":
         flag_html = '<span class="cal-flag cal-flag-past">FINALIZADO</span>'
     flag_wrap = f'<div class="cal-flag-wrap">{flag_html}</div>' if flag_html else ""
+
+    season = row.get("season", "")
+    round_number = row.get("round", "")
+    href = f"?section=season&season={season}&round={round_number}"
+    hint = "Ver resultados" if status == "past" else "Ver detalle"
+
     return (
-        f'<div class="cal-card cal-card-{status}">'
+        f'<a class="cal-card cal-card-{status}" href="{href}" target="_self" '
+        f'title="{row["name"]} · {hint}">'
         f'<div class="cal-header">'
-        f'<span class="cal-round">R{row["round"]}</span>'
+        f'<span class="cal-round">R{round_number}</span>'
         f'{flag_wrap}'
         f'</div>'
         f'<div class="cal-name">{row["name"]}</div>'
@@ -493,7 +513,8 @@ def _render_calendar_card(row: dict[str, Any]) -> str:
         f'<span class="cal-country">{row["country"]}</span>'
         f'<span class="cal-dates">{row["dates"]}</span>'
         f'</div>'
-        f'</div>'
+        f'<span class="cal-cta">{hint}</span>'
+        f'</a>'
     )
 
 
@@ -555,16 +576,6 @@ WMO_ICON: dict[int, str] = {
     80: "🌦️", 81: "🌧️", 82: "⛈️",
     95: "⛈️", 96: "⛈️", 99: "⛈️",
 }
-
-
-def _sector_offsets(lat: float, lon: float) -> list[tuple[float, float, str]]:
-    """Aproxima las posiciones de los 3 sectores alrededor del centro del circuito."""
-    d = 0.003
-    return [
-        (lat + d, lon - d * 0.6, "S1"),
-        (lat - d * 0.4, lon + d * 0.9, "S2"),
-        (lat + d * 0.7, lon + d * 0.5, "S3"),
-    ]
 
 
 def render_circuit_map(race: dict[str, Any]) -> None:
@@ -840,6 +851,7 @@ def render_overview() -> None:
         next_round = None
 
     st.markdown("### Calendario de la temporada")
+    st.caption("Selecciona una carrera para ver sus resultados en la seccion Temporada.")
     cal_rows = []
     for r in races:
         start, end = weekend_bounds(r)
@@ -854,6 +866,7 @@ def render_overview() -> None:
         )
         cal_rows.append(
             {
+                "season": r.get("season", datetime.now(LOCAL_TZ).year),
                 "round": rnd,
                 "name": r.get("raceName", "—"),
                 "circuit": r.get("Circuit", {}).get("circuitName", ""),
@@ -953,31 +966,104 @@ COMPOUND_COLORS_OPENF1 = {
     "UNKNOWN": "#6E6E76",
 }
 
+# Colores de equipo F1 (2024-2025). Se usan como dimension de color cuando el
+# compuesto no esta disponible (fuente Jolpica).
+TEAM_COLORS = {
+    "red bull": "#3671C6",
+    "ferrari": "#E8002D",
+    "mercedes": "#27F4D2",
+    "mclaren": "#FF8000",
+    "aston martin": "#229971",
+    "alpine": "#FF87BC",
+    "williams": "#64C4FF",
+    "racing bulls": "#6692FF",
+    "rb": "#6692FF",
+    "alphatauri": "#6692FF",
+    "sauber": "#52E252",
+    "kick sauber": "#52E252",
+    "stake": "#52E252",
+    "haas": "#B6BABD",
+}
 
-@st.cache_data(ttl=86400, show_spinner=False)
+# Respaldo cuando el equipo tampoco es identificable (paleta distinguible en oscuro)
+DRIVER_FALLBACK_COLORS = [
+    "#3671C6", "#E8002D", "#27F4D2", "#FF8000", "#229971",
+    "#FF87BC", "#64C4FF", "#52E252", "#B6BABD", "#9775FA",
+    "#F06595", "#4C6EF5",
+]
+
+# Paleta secuencial por numero de stint (S1, S2, S3, ...). Distinta de la de
+# compuestos para no confundir su semantica.
+STINT_COLORS = [
+    "#4C6EF5",  # S1 indigo
+    "#9775FA",  # S2 violeta
+    "#F06595",  # S3 rosa
+    "#20C997",  # S4 teal
+    "#FFA94D",  # S5 naranja
+    "#63E6BE",  # S6
+]
+
+
+def _team_color(team_name: str, index: int) -> str:
+    """Color de equipo si se reconoce; si no, se toma de la paleta de respaldo."""
+    name = (team_name or "").strip().lower()
+    for key, color in TEAM_COLORS.items():
+        if key in name:
+            return color
+    return DRIVER_FALLBACK_COLORS[index % len(DRIVER_FALLBACK_COLORS)]
+
+
+def _stint_color(stint_number: Any) -> str:
+    try:
+        idx = max(int(stint_number) - 1, 0)
+    except (TypeError, ValueError):
+        idx = 0
+    return STINT_COLORS[idx % len(STINT_COLORS)]
+
+
+def _compounds_known(stints_df: pd.DataFrame) -> bool:
+    """True si al menos un stint trae compuesto real (no UNKNOWN)."""
+    return bool((stints_df["compound"] != "UNKNOWN").any())
+
+
+@st.cache_data(ttl=86400, show_spinner="Cargando calendario de sesiones...")
 def _cached_sessions(year: int) -> list[dict[str, Any]]:
-    return openf1.get_sessions(year)
+    return historial.fetch_sessions(year)
 
 
 @st.cache_data(ttl=86400, show_spinner=False)
-def _cached_meetings(year: int) -> dict[int, str]:
-    meetings = openf1.get_meetings(year)
-    return {m["meeting_key"]: m.get("meeting_name", "") for m in meetings}
+def _cached_meetings(year: int) -> dict[Any, str]:
+    return historial.fetch_meetings(year)
 
 
-@st.cache_data(ttl=86400, show_spinner=False)
-def _cached_drivers(session_key: int) -> list[dict[str, Any]]:
-    return openf1.get_drivers(session_key)
+@st.cache_data(ttl=86400, show_spinner="Cargando pilotos...")
+def _cached_drivers(session_key: str, source: str, round_number: int) -> dict[str, dict[str, str]]:
+    session = {"session_key": session_key, "source": source, "round": round_number}
+    return historial.fetch_drivers(session)
 
 
-@st.cache_data(ttl=86400, show_spinner=False)
-def _cached_stints(session_key: int) -> list[dict[str, Any]]:
-    return openf1.get_stints(session_key)
+@st.cache_data(ttl=86400, show_spinner="Cargando stints...")
+def _cached_stints(session_key: str, source: str, round_number: int) -> list[dict[str, Any]]:
+    session = {"session_key": session_key, "source": source, "round": round_number}
+    return historial.fetch_stints(session)
 
 
-@st.cache_data(ttl=86400, show_spinner=False)
-def _cached_laps(session_key: int) -> list[dict[str, Any]]:
-    return openf1.get_laps(session_key)
+@st.cache_data(ttl=86400, show_spinner="Cargando vueltas...")
+def _cached_laps(session_key: str, source: str, round_number: int) -> list[dict[str, Any]]:
+    session = {"session_key": session_key, "source": source, "round": round_number}
+    return historial.fetch_laps(session)
+
+
+def session_drivers(session: dict[str, Any]) -> dict[str, dict[str, str]]:
+    return _cached_drivers(session["session_key"], session["source"], int(session.get("round") or 0))
+
+
+def session_stints(session: dict[str, Any]) -> list[dict[str, Any]]:
+    return _cached_stints(session["session_key"], session["source"], int(session.get("round") or 0))
+
+
+def session_laps(session: dict[str, Any]) -> list[dict[str, Any]]:
+    return _cached_laps(session["session_key"], session["source"], int(session.get("round") or 0))
 
 
 def _driver_label(d: dict[str, Any]) -> str:
@@ -985,21 +1071,21 @@ def _driver_label(d: dict[str, Any]) -> str:
 
 
 def _stint_metrics(stints: list[dict[str, Any]], laps: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    laps_by_driver: dict[int, list[dict[str, Any]]] = {}
+    laps_by_driver: dict[str, list[dict[str, Any]]] = {}
     for lap in laps:
         if lap.get("lap_duration") is None:
             continue
-        laps_by_driver.setdefault(lap["driver_number"], []).append(lap)
+        laps_by_driver.setdefault(lap["driver_key"], []).append(lap)
 
     rows: list[dict[str, Any]] = []
     for s in stints:
-        driver_number = s.get("driver_number")
+        driver_key = s.get("driver_key")
         lap_start = s.get("lap_start")
         lap_end = s.get("lap_end")
-        if driver_number is None or lap_start is None or lap_end is None:
+        if driver_key is None or lap_start is None or lap_end is None:
             continue
 
-        drv_laps = laps_by_driver.get(driver_number, [])
+        drv_laps = laps_by_driver.get(driver_key, [])
         relevant = [
             lap for lap in drv_laps
             if lap.get("lap_number") is not None
@@ -1013,7 +1099,7 @@ def _stint_metrics(stints: list[dict[str, Any]], laps: list[dict[str, Any]]) -> 
         compound = (s.get("compound") or "UNKNOWN").upper()
         rows.append(
             {
-                "driver_number": driver_number,
+                "driver_key": driver_key,
                 "stint_number": s.get("stint_number"),
                 "compound": compound,
                 "lap_start": lap_start,
@@ -1027,91 +1113,152 @@ def _stint_metrics(stints: list[dict[str, Any]], laps: list[dict[str, Any]]) -> 
     return rows
 
 
-def _render_stint_timeline(stints_df: pd.DataFrame, drivers: dict[int, dict[str, Any]]) -> None:
+def _render_stint_timeline(stints_df: pd.DataFrame, drivers: dict[str, dict[str, Any]]) -> None:
     if stints_df.empty:
         st.info("Sin datos de stints para graficar.")
         return
 
+    by_compound = _compounds_known(stints_df)
     fig = go.Figure()
-    drivers_in_data = sorted(stints_df["driver_number"].unique().tolist())
-    for idx, drv_num in enumerate(drivers_in_data):
-        sub = stints_df[stints_df["driver_number"] == drv_num].sort_values("stint_number")
-        label = drivers.get(drv_num, {}).get("full_name", f"#{drv_num}")
+    drivers_in_data = sorted(stints_df["driver_key"].unique().tolist())
+    seen: set[str] = set()
+
+    for idx, drv_key in enumerate(drivers_in_data):
+        sub = stints_df[stints_df["driver_key"] == drv_key].sort_values("stint_number")
+        label = drivers.get(drv_key, {}).get("full_name", f"#{drv_key}")
         for _, s in sub.iterrows():
+            if by_compound:
+                color = COMPOUND_COLORS_OPENF1.get(s["compound"], "#6E6E76")
+                tag = s["compound"]
+                legend_key = f"c-{s['compound']}"
+                legend_name = s["compound"].title()
+                inside = "?" if s["compound"] == "UNKNOWN" else s["compound"][0]
+            else:
+                color = _stint_color(s["stint_number"])
+                tag = f"Stint {s['stint_number']} (compuesto no disponible)"
+                legend_key = f"s-{s['stint_number']}"
+                legend_name = f"Stint {s['stint_number']}"
+                inside = f"S{s['stint_number']}"
+
+            text_fill = "#FFFFFF" if not by_compound or s["compound"] in ("SOFT", "INTERMEDIATE", "WET", "UNKNOWN") else "#0A0A0A"
             fig.add_trace(
                 go.Bar(
                     x=[s["lap_end"] - s["lap_start"] + 1],
                     y=[label],
                     base=[s["lap_start"]],
                     orientation="h",
-                    marker=dict(
-                        color=COMPOUND_COLORS_OPENF1.get(s["compound"], "#6E6E76"),
-                        line=dict(color="#0A0A0A", width=1),
-                    ),
-                    text=f"{s['compound'][0]}",
+                    marker=dict(color=color, line=dict(color="#0A0A0A", width=1)),
+                    text=inside,
                     textposition="inside",
                     insidetextanchor="middle",
-                    textfont=dict(color="#0A0A0A", size=10, family="JetBrains Mono, monospace"),
+                    textfont=dict(color=text_fill, size=9, family="JetBrains Mono, monospace"),
+                    name=legend_name,
+                    legendgroup=legend_key,
+                    showlegend=legend_key not in seen,
                     hovertemplate=(
-                        f"<b>{label}</b><br>"
-                        f"Stint {s['stint_number']} · {s['compound']}<br>"
+                        f"<b>{label}</b><br>{tag}<br>"
                         f"Laps {s['lap_start']}-{s['lap_end']} ({s['laps_completed']} vueltas)<br>"
                         f"Avg: {s['avg_lap_s']:.3f}s · Best: {s['best_lap_s']:.3f}s<extra></extra>"
                     ),
-                    showlegend=False,
                 )
             )
+            seen.add(legend_key)
 
+    legend_title = "Compuesto" if by_compound else "Stint"
     fig.update_layout(
         barmode="overlay",
-        height=max(120, 60 * len(drivers_in_data) + 60),
-        margin=dict(l=10, r=10, t=30, b=30),
+        height=max(160, 56 * len(drivers_in_data) + 90),
+        margin=dict(l=10, r=10, t=40, b=40),
         paper_bgcolor="#0A0A0A",
         plot_bgcolor="#0A0A0A",
         font=dict(color="#FFFFFF", family="Chivo, sans-serif"),
-        xaxis=dict(title="Vuelta", gridcolor="#1F1F1F", color="#8A92A6"),
+        xaxis=dict(title="Vuelta", gridcolor="#1F1F1F", color="#8A92A6", zeroline=False),
         yaxis=dict(autorange="reversed", gridcolor="#1F1F1F", color="#FFFFFF"),
         title=dict(text="Timeline de stints por piloto", font=dict(color="#FFFFFF", size=14)),
+        legend=dict(
+            title=dict(text=legend_title, font=dict(color="#8A92A6", size=10)),
+            bgcolor="#15151E",
+            bordercolor="#1F1F1F",
+            borderwidth=1,
+            font=dict(size=10),
+        ),
     )
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 
-def _render_pace_per_stint(stints_df: pd.DataFrame, drivers: dict[int, dict[str, Any]]) -> None:
+def _render_pace_per_stint(stints_df: pd.DataFrame, drivers: dict[str, dict[str, Any]]) -> None:
     if stints_df.empty:
         return
+
+    by_compound = _compounds_known(stints_df)
+    driver_index = {
+        key: i for i, key in enumerate(sorted(stints_df["driver_key"].unique().tolist()))
+    }
     fig = go.Figure()
+    seen: set[str] = set()
+
     for _, s in stints_df.iterrows():
-        label = drivers.get(s["driver_number"], {}).get("full_name", f"#{s['driver_number']}")
+        dkey = s["driver_key"]
+        info = drivers.get(dkey, {})
+        label = info.get("full_name", f"#{dkey}")
+
+        if by_compound:
+            color = COMPOUND_COLORS_OPENF1.get(s["compound"], "#6E6E76")
+            legend_key = f"c-{s['compound']}"
+            legend_name = s["compound"].title()
+            tag = s["compound"]
+        else:
+            color = _team_color(info.get("team_name", ""), driver_index.get(dkey, 0))
+            legend_key = f"d-{dkey}"
+            legend_name = label
+            tag = "Compuesto no disponible"
+
         fig.add_trace(
             go.Scatter(
                 x=[s["avg_lap_s"]],
                 y=[s["best_lap_s"]],
                 mode="markers",
                 marker=dict(
-                    size=max(8, min(36, s["laps_completed"] * 1.6)),
-                    color=COMPOUND_COLORS_OPENF1.get(s["compound"], "#6E6E76"),
-                    line=dict(color="#0A0A0A", width=1),
-                    opacity=0.85,
+                    size=max(10, min(38, s["laps_completed"] * 1.8)),
+                    color=color,
+                    line=dict(color="#0A0A0A", width=1.5),
+                    opacity=0.9,
                 ),
-                name=f"{label} · {s['compound']}",
+                name=legend_name,
+                legendgroup=legend_key,
+                showlegend=legend_key not in seen,
                 hovertemplate=(
-                    f"<b>{label}</b><br>Stint {s['stint_number']} · {s['compound']}<br>"
+                    f"<b>{label}</b><br>Stint {s['stint_number']}<br>"
+                    f"{tag}<br>"
                     f"Avg: {s['avg_lap_s']:.3f}s · Best: {s['best_lap_s']:.3f}s<br>"
                     f"{s['laps_completed']} vueltas<extra></extra>"
                 ),
-                showlegend=True,
             )
         )
+        seen.add(legend_key)
+
     fig.update_layout(
-        title=dict(text="Pace por stint · avg vs best (tamaño = vueltas)", font=dict(color="#FFFFFF", size=14)),
-        xaxis=dict(title="Tiempo medio de vuelta (s)", gridcolor="#1F1F1F", color="#8A92A6"),
-        yaxis=dict(title="Mejor vuelta del stint (s)", gridcolor="#1F1F1F", color="#8A92A6"),
+        title=dict(
+            text="Pace por stint · avg vs best (tamaño = vueltas)",
+            font=dict(color="#FFFFFF", size=14),
+        ),
+        xaxis=dict(title="Tiempo medio de vuelta (s)", gridcolor="#1F1F1F", color="#8A92A6", zeroline=False),
+        yaxis=dict(title="Mejor vuelta del stint (s)", gridcolor="#1F1F1F", color="#8A92A6", zeroline=False),
         paper_bgcolor="#0A0A0A",
         plot_bgcolor="#0A0A0A",
         font=dict(color="#FFFFFF", family="Chivo, sans-serif"),
-        height=420,
+        height=440,
         margin=dict(l=10, r=10, t=50, b=40),
-        legend=dict(bgcolor="#15151E", bordercolor="#1F1F1F", borderwidth=1, font=dict(size=10)),
+        legend=dict(
+            title=dict(
+                text="Compuesto" if by_compound else "Piloto",
+                font=dict(color="#8A92A6", size=10),
+            ),
+            bgcolor="#15151E",
+            bordercolor="#1F1F1F",
+            borderwidth=1,
+            font=dict(size=10),
+        ),
     )
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
@@ -1120,40 +1267,44 @@ def _render_history_section(
     title_label: str,
     eyebrow_label: str,
     session: dict[str, Any],
-    selected_driver_numbers: list[int],
+    selected_driver_keys: list[str],
 ) -> None:
-    session_key = session["session_key"]
     circuit = session.get("circuit_short_name", "")
     country = session.get("country_name", "")
-    date_start = session.get("date_start", "")[:10]
+    date_start = str(session.get("date_start", ""))[:10]
+    source = session.get("source", "openf1")
 
+    source_note = (
+        "Fuente: OpenF1"
+        if source == "openf1"
+        else "Fuente: Jolpica · compuesto no disponible"
+    )
     st.markdown(
         f"""
         <div class="history-card">
           <div class="eyebrow">{eyebrow_label}</div>
           <div class="history-title">{title_label}</div>
-          <div class="history-meta">{circuit}, {country} · {date_start}</div>
+          <div class="history-meta">{circuit}, {country} · {date_start} · {source_note}</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
     try:
-        drivers = _cached_drivers(session_key)
+        drivers = session_drivers(session)
     except Exception as exc:  # noqa: BLE001
-        st.error(f"No se pudo cargar drivers: {exc}")
+        st.error(f"No se pudo cargar pilotos: {exc}")
         return
-    drivers_by_num = {d["driver_number"]: d for d in drivers}
-    available = [d for d in drivers if d["driver_number"] in selected_driver_numbers]
+    available = {k: v for k, v in drivers.items() if k in selected_driver_keys}
     if not available:
         st.warning("Selecciona al menos un piloto en los selectores de arriba.")
         return
 
     try:
-        stints = _cached_stints(session_key)
-        laps = _cached_laps(session_key)
+        stints = session_stints(session)
+        laps = session_laps(session)
     except Exception as exc:  # noqa: BLE001
-        st.error(f"No se pudieron cargar stints/laps: {exc}")
+        st.error(f"No se pudieron cargar stints/vueltas: {exc}")
         return
 
     stints_metrics = _stint_metrics(stints, laps)
@@ -1161,28 +1312,33 @@ def _render_history_section(
     if stints_df.empty:
         st.info("No hay datos de stints para esta sesion.")
         return
-    stints_df = stints_df[stints_df["driver_number"].isin(selected_driver_numbers)].reset_index(drop=True)
+    stints_df = stints_df[stints_df["driver_key"].isin(selected_driver_keys)].reset_index(drop=True)
     if stints_df.empty:
         st.info("Los pilotos seleccionados no tienen stints en esta sesion.")
         return
 
-    available_by_num = {d["driver_number"]: d for d in available}
+    if _compounds_known(stints_df):
+        st.caption("Color: compuesto del neumatico (paleta Pirelli).")
+    else:
+        st.caption(
+            "Color: el compuesto no esta disponible en esta fuente; "
+            "el timeline se colorea por numero de stint y la dispersion por piloto (color de equipo)."
+        )
 
     col_a, col_b = st.columns(2)
     with col_a:
-        _render_stint_timeline(stints_df, available_by_num)
+        _render_stint_timeline(stints_df, available)
     with col_b:
-        _render_pace_per_stint(stints_df, available_by_num)
+        _render_pace_per_stint(stints_df, available)
 
     st.markdown("### Tabla de stints")
     table_rows = []
     for _, s in stints_df.iterrows():
-        label = available_by_num.get(s["driver_number"], {}).get("full_name", f"#{s['driver_number']}")
-        team = available_by_num.get(s["driver_number"], {}).get("team_name", "")
+        info = available.get(s["driver_key"], {})
         table_rows.append(
             {
-                "Piloto": label,
-                "Equipo": team,
+                "Piloto": info.get("full_name", s["driver_key"]),
+                "Equipo": info.get("team_name", ""),
                 "Stint": int(s["stint_number"]),
                 "Compuesto": s["compound"],
                 "Vueltas": f"{int(s['lap_start'])}-{int(s['lap_end'])} ({int(s['laps_completed'])})",
@@ -1219,7 +1375,7 @@ def render_history() -> None:
             sessions = _cached_sessions(year)
             meetings = _cached_meetings(year)
         except Exception as exc:  # noqa: BLE001
-            st.error(f"No se pudo cargar OpenF1: {exc}")
+            st.error(f"No se pudo cargar el historial: {exc}")
             _close_video_background()
             return
         if not sessions:
@@ -1227,41 +1383,44 @@ def render_history() -> None:
             _close_video_background()
             return
 
-        session_labels = [
-            f"R{s['meeting_key'] % 100} · {meetings.get(s['meeting_key'], s['circuit_short_name'])} · {s['date_start'][:10]}"
-            for s in sessions
-        ]
+        def _session_label(s: dict[str, Any]) -> str:
+            name = meetings.get(s.get("meeting_key"), s.get("circuit_short_name", "Carrera"))
+            return f"R{s.get('round')} · {name} · {str(s.get('date_start', ''))[:10]}"
+
         with col_d:
             session_idx = st.selectbox(
                 "Carrera",
                 options=range(len(sessions)),
-                format_func=lambda i: session_labels[i],
+                format_func=lambda i: _session_label(sessions[i]),
             )
 
         session = sessions[session_idx]
-        session_display_name = meetings.get(session["meeting_key"], session.get("circuit_short_name", "Carrera"))
+        session_display_name = meetings.get(
+            session.get("meeting_key"), session.get("circuit_short_name", "Carrera")
+        )
+
         try:
-            drivers = _cached_drivers(session["session_key"])
+            drivers = session_drivers(session)
         except Exception as exc:  # noqa: BLE001
-            st.error(f"No se pudo cargar drivers: {exc}")
+            st.error(f"No se pudo cargar pilotos: {exc}")
             _close_video_background()
             return
 
-        driver_opts = sorted(drivers, key=lambda d: d.get("full_name", ""))
-        driver_numbers = st.multiselect(
+        driver_keys_ordered = sorted(drivers, key=lambda k: drivers[k].get("full_name", ""))
+        selected_keys = st.multiselect(
             "Pilotos a comparar",
-            options=[d["driver_number"] for d in driver_opts],
-            default=[d["driver_number"] for d in driver_opts[:3]],
-            format_func=lambda n: _driver_label(next((d for d in driver_opts if d["driver_number"] == n), {"full_name": f"#{n}"})),
+            options=driver_keys_ordered,
+            default=driver_keys_ordered[:3],
+            format_func=lambda k: _driver_label(drivers.get(k, {"full_name": k})),
             max_selections=6,
         )
 
-        if driver_numbers:
+        if selected_keys:
             _render_history_section(
                 title_label=session_display_name,
                 eyebrow_label=f"{year} · Comparativa",
                 session=session,
-                selected_driver_numbers=driver_numbers,
+                selected_driver_keys=selected_keys,
             )
         else:
             st.info("Selecciona al menos un piloto.")
@@ -1274,11 +1433,13 @@ def render_history() -> None:
             meetings_2024 = _cached_meetings(2024)
             meetings_2025 = _cached_meetings(2025)
         except Exception as exc:  # noqa: BLE001
-            st.error(f"No se pudo cargar OpenF1: {exc}")
+            st.error(f"No se pudo cargar el historial: {exc}")
             _close_video_background()
             return
 
-        circuits = sorted({s.get("circuit_short_name") for s in sessions_2024 + sessions_2025 if s.get("circuit_short_name")})
+        circuits = sorted(
+            {s.get("circuit_short_name") for s in sessions_2024 + sessions_2025 if s.get("circuit_short_name")}
+        )
         circuit = st.selectbox("Circuito", options=circuits)
 
         s24 = next((s for s in sessions_2024 if s.get("circuit_short_name") == circuit), None)
@@ -1290,44 +1451,46 @@ def render_history() -> None:
             return
 
         try:
-            drivers_24 = {d["driver_number"]: d for d in _cached_drivers(s24["session_key"])}
-            drivers_25 = {d["driver_number"]: d for d in _cached_drivers(s25["session_key"])}
+            drivers_24 = session_drivers(s24)
+            drivers_25 = session_drivers(s25)
         except Exception as exc:  # noqa: BLE001
-            st.error(f"No se pudieron cargar drivers: {exc}")
+            st.error(f"No se pudieron cargar pilotos: {exc}")
             _close_video_background()
             return
 
-        common = sorted(set(drivers_24.keys()) & set(drivers_25.keys()))
+        common = sorted(
+            set(drivers_24.keys()) & set(drivers_25.keys()),
+            key=lambda k: (drivers_24.get(k) or drivers_25.get(k) or {}).get("full_name", ""),
+        )
         if not common:
             st.warning("No hay pilotos en comun entre 2024 y 2025 en este circuito.")
             _close_video_background()
             return
 
-        default_picks = common[: min(4, len(common))]
         picks = st.multiselect(
             "Pilotos a comparar",
             options=common,
-            default=default_picks,
-            format_func=lambda n: _driver_label(drivers_24.get(n) or drivers_25.get(n) or {"full_name": f"#{n}"}),
+            default=common[: min(4, len(common))],
+            format_func=lambda k: _driver_label(drivers_24.get(k) or drivers_25.get(k) or {"full_name": k}),
             max_selections=6,
         )
 
         if picks:
-            name_24 = meetings_2024.get(s24["meeting_key"], circuit)
-            name_25 = meetings_2025.get(s25["meeting_key"], circuit)
+            name_24 = meetings_2024.get(s24.get("meeting_key"), circuit)
+            name_25 = meetings_2025.get(s25.get("meeting_key"), circuit)
             st.markdown("#### Train · 2024")
             _render_history_section(
                 title_label=name_24,
                 eyebrow_label="Train · 2024",
                 session=s24,
-                selected_driver_numbers=picks,
+                selected_driver_keys=picks,
             )
             st.markdown("#### Eval · 2025")
             _render_history_section(
                 title_label=name_25,
                 eyebrow_label="Eval · 2025",
                 session=s25,
-                selected_driver_numbers=picks,
+                selected_driver_keys=picks,
             )
         else:
             st.info("Selecciona al menos un piloto.")
@@ -1340,7 +1503,16 @@ def render_season() -> None:
     render_header(*SECTIONS["season"])
 
     current_year = datetime.now(LOCAL_TZ).year
-    season = st.selectbox("Temporada", options=[current_year, current_year - 1, current_year - 2])
+    year_options = [current_year, current_year - 1, current_year - 2]
+
+    requested_year = st.session_state.get("season_year")
+    year_default = year_options.index(requested_year) if requested_year in year_options else 0
+    season = st.selectbox(
+        "Temporada",
+        options=year_options,
+        index=year_default,
+        key="season_year_widget",
+    )
 
     try:
         races = fetch_season_schedule(season)
@@ -1357,9 +1529,15 @@ def render_season() -> None:
         for r in races
         if r.get("round") is not None
     }
+    round_list = list(race_options)
+
+    requested_round = st.session_state.pop("season_round", None)
+    round_default = round_list.index(str(requested_round)) if str(requested_round) in round_list else 0
+
     round_number = st.selectbox(
         "Ronda",
-        options=list(race_options),
+        options=round_list,
+        index=round_default,
         format_func=lambda rnd: (
             f"R{rnd} · {race_options[rnd].get('raceName', 'Carrera')} · "
             f"{race_options[rnd].get('date', '')}"
@@ -1482,11 +1660,6 @@ def get_interest_stats() -> dict[str, Any]:
         "views_per_min": round(total_views / session_minutes, 2),
         "visits": visits,
     }
-
-
-@st.cache_data(ttl=86400, show_spinner="Descargando resultados historicos (Jolpica)...")
-def _cached_season_results(year: int) -> list[dict[str, Any]]:
-    return prediccion.fetch_season_results(year)
 
 
 @st.cache_data(ttl=3600, show_spinner=False)
@@ -1618,7 +1791,6 @@ def _feature_label(name: str) -> str:
         "grid": "Posicion de salida",
         "driver_form": "Forma del piloto",
         "constructor_form": "Forma del equipo",
-        "recent_form": "Forma reciente",
     }.get(name, name)
 
 
@@ -1773,7 +1945,38 @@ def render_prediction() -> None:
     st.plotly_chart(fig, use_container_width=True)
 
 
+def _apply_query_navigation() -> None:
+    """Lee los parametros de la URL (enlaces de Raceweek) y fija la navegacion.
+
+    Debe ejecutarse ANTES de crear el radio del sidebar para que Streamlit tome
+    el valor como estado inicial del widget.
+    """
+    try:
+        params = st.query_params
+        target = params.get("section")
+        season = params.get("season")
+        round_number = params.get("round")
+    except Exception:  # noqa: BLE001
+        return
+
+    if not any((target, season, round_number)):
+        return
+
+    if target in ("overview", "season", "prediction", "telemetry"):
+        st.session_state["nav_section"] = target
+    if season:
+        st.session_state["season_year"] = int(season)
+    if round_number:
+        st.session_state["season_round"] = str(round_number)
+
+    try:
+        st.query_params.clear()
+    except Exception:  # noqa: BLE001
+        pass
+
+
 def main() -> None:
+    _apply_query_navigation()
     section = render_sidebar()
     track_interest(section)
 

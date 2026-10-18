@@ -116,7 +116,6 @@ def build_feature_frame(rows: list[dict[str, Any]]) -> pd.DataFrame:
 
     driver_form: list[float] = []
     constructor_form: list[float] = []
-    recent_form: list[float] = []
 
     for row in df.itertuples(index=False):
         drv = row.driver_id
@@ -124,14 +123,12 @@ def build_feature_frame(rows: list[dict[str, Any]]) -> pd.DataFrame:
 
         driver_form.append(_mean(driver_history.get(drv, [])))
         constructor_form.append(_mean(constructor_history.get(con, [])))
-        recent_form.append(_mean(driver_history.get(drv, [])[-3:]))
 
         driver_history.setdefault(drv, []).append(row.position)
         constructor_history.setdefault(con, []).append(row.position)
 
     df["driver_form"] = driver_form
     df["constructor_form"] = constructor_form
-    df["recent_form"] = recent_form
     df["grid"] = df["grid"].fillna(20)
     return df
 
@@ -142,7 +139,7 @@ def _mean(values: list[int]) -> float:
     return float(sum(values)) / len(values)
 
 
-FEATURES = ["grid", "driver_form", "constructor_form", "recent_form"]
+FEATURES = ["grid", "driver_form", "constructor_form"]
 
 
 @dataclass
@@ -175,7 +172,7 @@ def train_and_evaluate(
     if train_df.empty or eval_df.empty:
         raise ValueError("Datos insuficientes para entrenar/evaluar.")
 
-    for col in ("driver_form", "constructor_form", "recent_form"):
+    for col in ("driver_form", "constructor_form"):
         fill = train_df[col].mean()
         if pd.isna(fill):
             fill = 10.0
@@ -263,16 +260,4 @@ def _spearman(a: np.ndarray, b: np.ndarray) -> float:
         return 0.0
 
 
-def predict_from_grid(model: Ridge, grid_position: int, forms: dict[str, float] | None = None) -> float:
-    forms = forms or {}
-    x = np.array([[
-        float(grid_position),
-        float(forms.get("driver_form", 10.0)),
-        float(forms.get("constructor_form", 10.0)),
-        float(forms.get("recent_form", 10.0)),
-    ]])
-    return float(model.predict(x)[0])
 
-
-def accuracy_by_season_flag(report: ModelReport) -> float:
-    return report.accuracy_pm3

@@ -37,7 +37,7 @@ El simulador itera vuelta a vuelta, suma tiempos y aplica `pit_loss` en las vuel
 ## Estructura
 
 ```
-Car project/
+ApexAnalytics/
 ├── app.py              # Dashboard Streamlit
 ├── simulacion.py       # Motor de simulacion de estrategias
 ├── README.md

@@ -363,8 +363,9 @@ predicción de resultados para carreras de Fórmula 1.
 
 | Fuente | KPIs que alimenta | URL |
 |---|---|---|
-| Jolpica / Ergast API | 1, 2, 3, 7, 12–16 | https://jolpi.ca/ergast/f1/ |
-| OpenF1 API | 17, 18, 19 | https://openf1.org/ |
+| Jolpica / Ergast API | 1, 2, 3, 7, 12–16 (calendario, resultados, modelo) | https://jolpi.ca/ergast/f1/ |
+| OpenF1 API | 17, 18, 19 (primaria: compuestos y telemetría de stints) | https://openf1.org/ |
+| Jolpica `/laps` + `/pitstops` | 17, 18, 19 (respaldo: stints derivados de paradas; sin compuesto) | https://jolpi.ca/ergast/f1/ |
 | Open-Meteo API | 4, 5 | https://open-meteo.com/ |
 | Catálogo interno `simulacion.py` | 7–11 | — |
 | Geometría procedural `circuits.py` | 6 | — |

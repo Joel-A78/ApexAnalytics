@@ -1,4 +1,4 @@
-# Multi-stage build for Motorpulse
+# Multi-stage build for ApexAnalytics
 # Stage 1: Builder
 FROM python:3.14-slim as builder
 

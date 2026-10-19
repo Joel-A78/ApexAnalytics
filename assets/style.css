@@ -25,26 +25,23 @@
     --neutral-soft: #1A1F2A;
     --neutral-line: #232938;
 
-    --peach: #F4A28C;
-    --peach-dark: #E0856C;
-
     --white: #FFFFFF;
     --white-soft: #E6E8EE;
     --muted: #8A92A6;
 
-    /* Compuestos Pirelli (alineados al sistema) */
-    --compound-soft: var(--primary);
-    --compound-medium: var(--peach);
-    --compound-hard: var(--white);
-    --compound-inter: var(--secondary);
-    --compound-wet: var(--tertiary);
+    /* Compuestos Pirelli */
+    --compound-soft: #E10600;
+    --compound-medium: #FFD500;
+    --compound-hard: #FFFFFF;
+    --compound-inter: #00B050;
+    --compound-wet: #1E90FF;
 }
 
 /* ----- Base ----- */
 html, body, [data-testid="stAppViewContainer"] {
     background: var(--neutral);
     color: var(--white);
-    font-family: "Chivo", "Segoe UI", system-ui, sans-serif;
+    font-family: "Chivo", sans-serif;
     font-weight: 400;
 }
 
@@ -158,61 +155,217 @@ html, body, [data-testid="stAppViewContainer"] {
     background: linear-gradient(90deg, var(--primary), var(--neutral-line) 40%, transparent);
 }
 
-/* Contenedor de opciones */
-[data-testid="stSidebar"] div[role="radiogroup"] {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
+/* Navegacion deportiva: tarjeta que barre por detras del nombre */
+[data-testid="stSidebar"] .stButton {
+    margin: 0 0 0.4rem 0;
 }
 
-/* Cada opcion */
-[data-testid="stSidebar"] div[role="radiogroup"] > label {
+/* Acento por boton (clases st-key-* de Streamlit) */
+.st-key-nav_btn_overview,
+.st-key-refresh_button {
+    --btn-accent: #E10600;
+    --btn-soft: rgba(225, 6, 0, 0.30);
+    --btn-mid: rgba(225, 6, 0, 0.80);
+    --btn-glow: rgba(225, 6, 0, 0.55);
+}
+
+.st-key-nav_btn_season {
+    --btn-accent: #1E90FF;
+    --btn-soft: rgba(30, 144, 255, 0.30);
+    --btn-mid: rgba(30, 144, 255, 0.80);
+    --btn-glow: rgba(30, 144, 255, 0.55);
+}
+
+.st-key-nav_btn_prediction {
+    --btn-accent: #8800FF;
+    --btn-soft: rgba(136, 0, 255, 0.30);
+    --btn-mid: rgba(136, 0, 255, 0.80);
+    --btn-glow: rgba(136, 0, 255, 0.55);
+}
+
+.st-key-nav_btn_telemetry {
+    --btn-accent: #00B050;
+    --btn-soft: rgba(0, 176, 80, 0.30);
+    --btn-mid: rgba(0, 176, 80, 0.80);
+    --btn-glow: rgba(0, 176, 80, 0.55);
+}
+
+/* Base comun: gris por defecto */
+[data-testid="stSidebar"] .stButton > button,
+[data-testid="stMain"] .st-key-refresh_button button {
     position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-    margin: 0;
-    padding: 0.7rem 0.85rem 0.7rem 1rem;
-    background: rgba(255, 255, 255, 0.025);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-left: 3px solid rgba(255, 255, 255, 0.10);
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
-}
-
-[data-testid="stSidebar"] div[role="radiogroup"] > label:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-left-color: rgba(225, 6, 0, 0.55);
-    transform: translateX(2px);
-}
-
-/* Nota: no se oculta el circulo del radio. En la version actual de Streamlit el
-   texto y el circulo comparten el mismo contenedor, y ocultarlo escondia la
-   etiqueta. Se deja el indicador nativo del radio. */
-
-/* Texto de la opcion */
-[data-testid="stSidebar"] div[role="radiogroup"] > label p {
+    overflow: hidden;
+    isolation: isolate;
+    box-sizing: border-box;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: none;
     color: var(--white-soft);
-    font-family: "Chivo", sans-serif;
-    font-size: 0.95rem;
+    transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+[data-testid="stSidebar"] .stButton > button {
+    width: 100%;
+    min-height: 48px;
+    justify-content: flex-start;
+    text-align: left;
+    padding: 0.7rem 0.9rem;
+    /* Existe siempre (transparente) para que el estado activo no cambie la caja */
+    border-left: 3px solid transparent;
+}
+
+[data-testid="stMain"] .st-key-refresh_button button {
+    min-height: 40px;
+    padding: 0.45rem 1rem;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+/* El contenido queda por encima de la tarjeta animada */
+[data-testid="stSidebar"] .stButton > button > div,
+[data-testid="stMain"] .st-key-refresh_button button > div {
+    position: relative;
+    z-index: 1;
+}
+
+[data-testid="stSidebar"] .stButton > button p {
+    width: 100%;
+    text-align: left;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.86rem;
     font-weight: 600;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.05em;
     margin: 0;
-    transition: color 0.15s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.2s ease;
 }
 
-/* Opcion activa */
-[data-testid="stSidebar"] div[role="radiogroup"] > label:has(input:checked) {
-    background: linear-gradient(90deg, rgba(225, 6, 0, 0.22) 0%, rgba(225, 6, 0, 0.04) 60%, transparent 100%);
-    border-color: rgba(225, 6, 0, 0.35);
-    border-left-color: var(--primary);
-    box-shadow: 0 2px 10px rgba(225, 6, 0, 0.18);
+/* LA TARJETA: entra inclinada y se estaciona detras del texto */
+[data-testid="stSidebar"] .stButton > button::before,
+[data-testid="stMain"] .st-key-refresh_button button::before {
+    content: "";
+    position: absolute;
+    top: -3px;
+    bottom: -3px;
+    left: -20%;
+    width: 150%;
+    z-index: -1;
+    background:
+        linear-gradient(105deg,
+            rgba(255, 255, 255, 0.00) 0%,
+            rgba(255, 255, 255, 0.14) 24%,
+            var(--btn-soft) 46%,
+            var(--btn-mid) 62%,
+            rgba(255, 255, 255, 0.00) 100%);
+    transform: translateX(-140%) skewX(-16deg);
+    transition: transform 0.48s cubic-bezier(0.22, 0.9, 0.24, 1);
+    pointer-events: none;
 }
 
-[data-testid="stSidebar"] div[role="radiogroup"] > label:has(input:checked) p {
-    color: var(--white);
+/* Linea de velocidad que persigue a la tarjeta */
+[data-testid="stSidebar"] .stButton > button::after,
+[data-testid="stMain"] .st-key-refresh_button button::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 22px;
+    z-index: -1;
+    opacity: 0;
+    background: linear-gradient(90deg, transparent, var(--btn-accent), rgba(255, 255, 255, 0.95), transparent);
+    transform: translateX(-300%) skewX(-16deg);
+    transition: transform 0.55s ease, opacity 0.25s ease;
+    pointer-events: none;
+}
+
+/* HOVER: barrido con el acento de cada boton */
+[data-testid="stSidebar"] .stButton > button:hover,
+[data-testid="stMain"] .st-key-refresh_button button:hover {
+    color: #FFFFFF;
+    border-color: var(--btn-accent);
+    transform: translateX(3px);
+}
+
+[data-testid="stSidebar"] .stButton > button:hover::before,
+[data-testid="stMain"] .st-key-refresh_button button:hover::before {
+    transform: translateX(0) skewX(-16deg);
+}
+
+[data-testid="stSidebar"] .stButton > button:hover::after,
+[data-testid="stMain"] .st-key-refresh_button button:hover::after {
+    opacity: 1;
+    transform: translateX(2200%) skewX(-16deg);
+}
+
+[data-testid="stSidebar"] .stButton > button:hover p {
+    color: #FFFFFF;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 10px var(--btn-glow);
+}
+
+[data-testid="stMain"] .st-key-refresh_button button:hover {
+    background: rgba(255, 255, 255, 0.04);
+    text-shadow: 0 0 10px var(--btn-glow);
+}
+
+[data-testid="stSidebar"] .stButton > button:focus:not(:active),
+[data-testid="stMain"] .st-key-refresh_button button:focus:not(:active) {
+    border-color: var(--btn-accent);
+    box-shadow: 0 0 0 2px var(--btn-soft);
+}
+
+/* ITEM ACTIVO: acento estacionado con el color de su seccion */
+[data-testid="stSidebar"] .stButton > button[kind="primary"] {
+    background: linear-gradient(90deg, var(--btn-soft) 0%, transparent 85%);
+    border-color: var(--btn-accent);
+    border-left-color: var(--btn-accent);
+    color: #FFFFFF;
+    box-shadow: 0 0 18px var(--btn-soft), inset 0 0 12px rgba(255, 255, 255, 0.04);
+}
+
+[data-testid="stSidebar"] .stButton > button[kind="primary"]::before {
+    transform: translateX(0) skewX(-16deg);
+    transition: none;
+    background:
+        linear-gradient(105deg,
+            rgba(255, 255, 255, 0.00) 0%,
+            var(--btn-soft) 30%,
+            rgba(255, 255, 255, 0.16) 52%,
+            var(--btn-soft) 70%,
+            rgba(255, 255, 255, 0.00) 100%);
+}
+
+[data-testid="stSidebar"] .stButton > button[kind="primary"]::after {
+    opacity: 0;
+}
+
+[data-testid="stSidebar"] .stButton > button[kind="primary"] p {
+    color: #FFFFFF;
     font-weight: 800;
+    /* Mismo tracking que el estado inactivo: el texto no cambia de ancho */
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 12px var(--btn-glow);
+}
+
+/* Accesibilidad: sin movimiento si el usuario lo pide */
+@media (prefers-reduced-motion: reduce) {
+    [data-testid="stSidebar"] .stButton > button::before,
+    [data-testid="stSidebar"] .stButton > button::after,
+    [data-testid="stMain"] .st-key-refresh_button button::before,
+    [data-testid="stMain"] .st-key-refresh_button button::after {
+        transition: none;
+    }
+    [data-testid="stSidebar"] .stButton > button:hover,
+    [data-testid="stMain"] .st-key-refresh_button button:hover {
+        transform: none;
+    }
 }
 
 
@@ -220,7 +373,7 @@ html, body, [data-testid="stAppViewContainer"] {
 /* ----- Eyebrow / labels (JetBrains Mono) ----- */
 .eyebrow {
     color: var(--primary);
-    font-family: "JetBrains Mono", "Consolas", monospace;
+    font-family: "JetBrains Mono", monospace;
     font-size: 0.7rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -268,42 +421,6 @@ html, body, [data-testid="stAppViewContainer"] {
     margin: 0.3rem 0 0;
     font-family: "Chivo", sans-serif;
 }
-
-/* ----- KPI cards ----- */
-.kpi-card {
-    background: var(--neutral-soft);
-    border: 1px solid var(--neutral-line);
-    border-top: 3px solid var(--primary);
-    border-radius: 6px;
-    padding: 1rem 1.1rem;
-    min-height: 6.2rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.kpi-card.cyan { border-top-color: var(--secondary); }
-.kpi-card.purple { border-top-color: var(--tertiary); }
-.kpi-card.peach { border-top-color: var(--peach); }
-.kpi-card.white { border-top-color: var(--white); }
-
-.kpi-label {
-    color: var(--muted);
-    font-family: "JetBrains Mono", monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    font-weight: 600;
-}
-
-.kpi-value {
-    color: var(--white);
-    font-family: "JetBrains Mono", monospace;
-    font-size: 1.4rem;
-    font-weight: 700;
-}
-
-.kpi-sub { color: var(--muted); font-size: 0.7rem; font-family: "JetBrains Mono", monospace; }
 
 /* ----- Race event cards ----- */
 .race-card {
@@ -800,57 +917,38 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 
 .circuit-card svg {
-    width: 100%;
-    height: auto;
     display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 300px;
+    margin: 0 auto;
     border-radius: 8px;
 }
 
-/* ----- Mode toggle (Historial) ----- */
-.overview-wrap.fixed-bg .mode-toggle {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 0.9rem 1.1rem;
-    margin: 0 0 1rem 0;
-    background: rgba(70, 75, 86, 0.97);
-    border: 1px solid rgba(255, 255, 255, 0.20);
-    border-radius: 6px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+/* Pantalla completa: mismo trazado, mucho mas grande */
+.circuit-card.fullscreen {
+    padding: 1rem;
 }
 
-.overview-wrap.fixed-bg .mode-toggle .mode-label {
-    color: var(--secondary);
-    font-family: "JetBrains Mono", monospace;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
+.circuit-card.fullscreen svg {
+    max-height: min(74vh, 760px);
+    max-width: 100%;
 }
 
-.overview-wrap.fixed-bg .mode-toggle .mode-pills {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
+/* ----- Panel de filtros y selector de modo (Historial) ----- */
+[data-testid="stVerticalBlockBorderWrapper"] {
+    background: rgba(255, 255, 255, 0.015);
+    border-color: var(--neutral-line) !important;
+    border-radius: 8px;
 }
 
-.overview-wrap.fixed-bg .mode-toggle .mode-pill {
-    padding: 0.55rem 1rem;
-    background: rgba(35, 35, 42, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 999px;
-    color: var(--white);
+[data-testid="stSegmentedControl"] button,
+[data-baseweb="button-group"] button {
     font-family: "Chivo", sans-serif;
-    font-size: 0.9rem;
+    font-size: 0.82rem;
     font-weight: 700;
     letter-spacing: 0.02em;
-}
-
-.overview-wrap.fixed-bg .mode-toggle .mode-pill.active {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: var(--white);
-    box-shadow: 0 0 0 2px rgba(225, 6, 0, 0.30);
 }
 
 /* ----- History card (Historial) ----- */
@@ -910,67 +1008,122 @@ html, body, [data-testid="stAppViewContainer"] {
 }
 
 /* ----- Strategy recommended banner ----- */
-.strategy-banner {
-    padding: 1.4rem 1.5rem;
-    border: 2px solid var(--primary);
+/* Estrategia compacta, alineada con la altura de las metricas */
+.strategy-inline {
+    height: 6.9rem;
+    min-height: 6.9rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.7rem 0.95rem;
     background:
-        linear-gradient(135deg, var(--primary-soft) 0%, transparent 60%),
+        linear-gradient(105deg, rgba(225, 6, 0, 0.22) 0%, rgba(225, 6, 0, 0.03) 70%, transparent 100%),
         var(--neutral-soft);
-    margin: 0.5rem 0 1rem 0;
-    position: relative;
+    border: 1px solid rgba(225, 6, 0, 0.45);
+    border-left: 3px solid var(--primary);
     border-radius: 6px;
+    overflow: hidden;
 }
 
-.strategy-banner::before {
-    content: "POLE POSITION";
-    position: absolute;
-    top: -10px;
-    left: 16px;
+.strategy-inline .strategy-inline-tag {
+    align-self: flex-start;
     background: var(--primary);
     color: var(--white);
-    padding: 0.2rem 0.7rem;
-    font-family: "JetBrains Mono", monospace;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
+    padding: 0.1rem 0.45rem;
     border-radius: 3px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.56rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.strategy-inline .strategy-inline-name {
+    color: var(--white);
+    font-family: "Chivo", sans-serif;
+    font-size: 1.15rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.strategy-inline .strategy-inline-chips {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: nowrap;
+    overflow: hidden;
+}
+
+.strategy-inline .compound-chip {
+    margin-right: 0;
+    padding: 0.12rem 0.4rem;
+    font-size: 0.62rem;
 }
 
 /* ----- Streamlit st.metric ----- */
+/* KPIs uniformes: misma altura para todas las tarjetas */
 [data-testid="stMetric"] {
     background: var(--neutral-soft);
     border: 1px solid var(--neutral-line);
     border-top: 3px solid var(--primary);
     border-radius: 6px;
-    padding: 0.8rem 0.95rem;
-    min-height: 5.5rem;
+    padding: 0.75rem 0.95rem;
+    height: 6.9rem;
+    min-height: 6.9rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0.3rem;
+    overflow: hidden;
 }
 
 [data-testid="stMetricValue"] {
     color: var(--white);
-    font-family: "JetBrains Mono", "Consolas", monospace;
+    font-family: "JetBrains Mono", monospace;
     font-weight: 700;
-    font-size: 1.55rem;
-    line-height: 1.25;
-    word-break: break-word;
-    overflow-wrap: anywhere;
+    font-size: 1.5rem;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 0 0 auto;
 }
 
 [data-testid="stMetricLabel"] {
     color: var(--muted);
     font-family: "JetBrains Mono", monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.08em;
+    font-size: 0.62rem;
+    letter-spacing: 0.07em;
     text-transform: uppercase;
+    line-height: 1.2;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    flex: 0 0 auto;
+    min-height: 1.5rem;
 }
 
 [data-testid="stMetricDelta"] {
     color: var(--secondary);
     font-family: "JetBrains Mono", monospace;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    flex: 0 0 auto;
+    min-height: 1.15rem;
+    margin-top: auto;
 }
 
 [data-testid="stMetricDelta"] svg { display: none; }
+
+/* La columna estira la metrica para que todas midan igual */
+[data-testid="stColumn"]:has([data-testid="stMetric"]) > [data-testid="stVerticalBlock"] {
+    height: 100%;
+}
 
 /* ----- Tabs ----- */
 button[data-baseweb="tab"][aria-selected="true"] {
@@ -983,25 +1136,26 @@ button[data-baseweb="tab"][aria-selected="true"] {
 button[data-baseweb="tab"] { color: var(--muted) !important; }
 
 /* ----- Buttons ----- */
-button[kind="primary"] {
-    background-color: var(--primary) !important;
-    border-color: var(--primary) !important;
-    color: var(--white) !important;
+/* Botones del area principal (el sidebar tiene su propio estilo) */
+[data-testid="stMain"] button[kind="primary"] {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: var(--white);
     font-family: "Chivo", sans-serif;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
-button[kind="primary"]:hover {
-    background-color: var(--primary-dark) !important;
-    border-color: var(--primary-dark) !important;
+[data-testid="stMain"] button[kind="primary"]:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
 }
 
-button[kind="secondary"] {
-    background-color: var(--peach) !important;
-    border-color: var(--peach) !important;
-    color: var(--neutral) !important;
+[data-testid="stMain"] button[kind="secondary"] {
+    background-color: transparent;
+    border-color: rgba(255, 255, 255, 0.18);
+    color: var(--white);
     font-family: "Chivo", sans-serif;
     font-weight: 700;
 }
@@ -1089,118 +1243,6 @@ p, li, label, span, div {
     border: 1px solid var(--neutral-line);
     border-radius: 6px;
     padding: 0.5rem;
-}
-
-/* ----- Overview: video as background (Raceweek) ----- */
-.overview-wrap {
-    position: relative;
-    overflow: hidden;
-    background: #000000;
-    padding: 1rem 0 2rem 0;
-    border-radius: 6px;
-}
-
-.overview-wrap .bg-video {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    z-index: 0;
-}
-
-.overview-wrap .bg-overlay {
-    position: absolute;
-    inset: 0;
-    background:
-        linear-gradient(180deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.78) 100%),
-        linear-gradient(90deg, rgba(225,6,0,0.10) 0%, transparent 50%);
-    z-index: 1;
-    pointer-events: none;
-}
-
-.overview-wrap > div:not(.bg-video):not(.bg-overlay) {
-    position: relative;
-    z-index: 2;
-}
-
-/* ----- Fixed video background (Historial) ----- */
-.overview-wrap.fixed-bg {
-    background: transparent;
-    border-radius: 0;
-    padding: 1.5rem 0 3rem 0;
-}
-
-.overview-wrap.fixed-bg .bg-video {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    object-fit: cover;
-    z-index: 0;
-    pointer-events: none;
-}
-
-.overview-wrap.fixed-bg .bg-overlay {
-    position: fixed;
-    inset: 0;
-    background:
-        linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.55) 100%),
-        linear-gradient(90deg, rgba(225,6,0,0.08) 0%, transparent 50%);
-    z-index: 1;
-    pointer-events: none;
-}
-
-.overview-wrap.fixed-bg > div:not(.bg-video):not(.bg-overlay) {
-    position: relative;
-    z-index: 2;
-}
-
-.overview-wrap.fixed-bg [data-testid="stMetric"] {
-    background: rgba(75, 80, 92, 0.96) !important;
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-    border: 1px solid rgba(255, 255, 255, 0.30) !important;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
-}
-
-.overview-wrap.fixed-bg [data-testid="stDataFrame"] {
-    background: rgba(70, 75, 86, 0.97) !important;
-    border: 1px solid rgba(255, 255, 255, 0.30) !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-}
-
-.overview-wrap.fixed-bg [data-testid="stPlotlyChart"] {
-    background: rgba(70, 75, 86, 0.97) !important;
-    border: 1px solid rgba(255, 255, 255, 0.30) !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-}
-
-.overview-wrap.fixed-bg [data-testid="stInfo"] {
-    background: rgba(70, 75, 86, 0.97) !important;
-    border: 1px solid rgba(255, 255, 255, 0.30) !important;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
-}
-
-.overview-wrap.fixed-bg .command-header,
-.overview-wrap.fixed-bg .history-card,
-.overview-wrap.fixed-bg .race-card,
-.overview-wrap.fixed-bg .circuit-card,
-.overview-wrap.fixed-bg .weather-card {
-    background: rgba(70, 75, 86, 0.97);
-    border-color: rgba(255, 255, 255, 0.28);
-    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.55);
-}
-
-.overview-wrap.fixed-bg [data-baseweb="select"] > div,
-.overview-wrap.fixed-bg [data-baseweb="input"] > div,
-.overview-wrap.fixed-bg [data-baseweb="textarea"] > div {
-    background: rgba(85, 90, 102, 0.98) !important;
-    border: 1px solid rgba(255, 255, 255, 0.35) !important;
-    color: var(--white) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 /* ----- Season calendar timeline (Raceweek) ----- */

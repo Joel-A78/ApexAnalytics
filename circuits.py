@@ -12,6 +12,7 @@ from __future__ import annotations
 import math
 import random
 
+# Proporcion original del trazado (no deformar la figura)
 W, H = 720, 460
 CX, CY = W / 2, H / 2 + 8
 BASE_RX = 250

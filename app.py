@@ -82,6 +82,14 @@ def fmt_today_es(d: date) -> str:
     return f"{WEEKDAY_ES[d.weekday()]}, {fmt_date_long(d)}"
 
 
+NAV_ITEMS: list[tuple[str, str]] = [
+    ("overview", "Raceweek"),
+    ("season", "Temporada"),
+    ("prediction", "Simulacion"),
+    ("telemetry", "Historial"),
+]
+
+
 def render_sidebar() -> str:
     import base64
     with open("assets/media/ApexAnalytics logo letras.png", "rb") as _f:
@@ -103,18 +111,21 @@ def render_sidebar() -> str:
             unsafe_allow_html=True,
         )
 
-        section = st.radio(
-            "Secciones",
-            options=["overview", "season", "prediction", "telemetry"],
-            format_func=lambda s: {
-                "overview": "Raceweek",
-                "season": "Temporada",
-                "prediction": "Simulacion",
-                "telemetry": "Historial",
-            }[s],
-            label_visibility="collapsed",
-            key="nav_section",
-        )
+        if "nav_section" not in st.session_state:
+            st.session_state["nav_section"] = "overview"
+
+        for index, (key, label) in enumerate(NAV_ITEMS, start=1):
+            is_active = st.session_state["nav_section"] == key
+            if st.button(
+                f"{index:02d}   {label}",
+                key=f"nav_btn_{key}",
+                use_container_width=True,
+                type="primary" if is_active else "secondary",
+            ):
+                st.session_state["nav_section"] = key
+                st.rerun()
+
+        section = st.session_state["nav_section"]
 
         st.markdown('<div class="nav-divider"></div>', unsafe_allow_html=True)
         now = datetime.now(LOCAL_TZ)
@@ -578,7 +589,7 @@ WMO_ICON: dict[int, str] = {
 }
 
 
-def render_circuit_map(race: dict[str, Any]) -> None:
+def render_circuit_map(race: dict[str, Any], fullscreen: bool = False) -> None:
     from circuits import generate_circuit_svg
     circuit_api_name = race.get("Circuit", {}).get("circuitName", "Circuito")
     circuit_key = match_circuit_key(race) or circuit_api_name
@@ -599,7 +610,7 @@ def render_circuit_map(race: dict[str, Any]) -> None:
         unsafe_allow_html=True,
     )
 
-    f1, f2 = st.columns([1.3, 1])
+    f1, f2, f3 = st.columns([1.3, 1, 1])
     with f1:
         sector_filter = st.selectbox(
             "Filtrar sectores",
@@ -621,6 +632,15 @@ def render_circuit_map(race: dict[str, Any]) -> None:
             value=True,
             key=f"corners_{circuit_key}",
         )
+    with f3:
+        if fullscreen:
+            if st.button("Salir", key="map_exit_fs", use_container_width=True):
+                st.session_state["map_fullscreen"] = False
+                st.rerun()
+        else:
+            if st.button("Pantalla completa", key="map_enter_fs", use_container_width=True):
+                st.session_state["map_fullscreen"] = True
+                st.rerun()
 
     selected = _parse_sector_filter(sector_filter)
     dimmed = ({c for c in ("S1", "S2", "S3") if c not in selected}) if selected else set()
@@ -634,7 +654,8 @@ def render_circuit_map(race: dict[str, Any]) -> None:
         seed=circuit_key,
     )
 
-    st.markdown(f'<div class="circuit-card">{svg}</div>', unsafe_allow_html=True)
+    card_class = "circuit-card fullscreen" if fullscreen else "circuit-card"
+    st.markdown(f'<div class="{card_class}">{svg}</div>', unsafe_allow_html=True)
 
     if selected:
         st.caption(f"Mostrando {', '.join(sorted(selected))} · los demas sectores quedan atenuados.")
@@ -793,7 +814,7 @@ def render_overview() -> None:
         f"{fmt_today_es(today).capitalize()}</div>",
         unsafe_allow_html=True,
     )
-    if top_cols[2].button("Actualizar", use_container_width=True):
+    if top_cols[2].button("Actualizar", use_container_width=True, key="refresh_button"):
         fetch_season_schedule.clear()
         st.rerun()
 
@@ -838,12 +859,17 @@ def render_overview() -> None:
 
     if next_race:
         next_label = next_race.get("raceName", "Proxima carrera")
+        map_fullscreen = bool(st.session_state.get("map_fullscreen"))
         st.markdown(f"### Datos geométricos · {next_label}")
-        wx_col, map_col = st.columns([1, 2.05], gap="medium")
-        with wx_col:
-            render_weather_card(next_race)
-        with map_col:
-            render_circuit_map(next_race)
+
+        if map_fullscreen:
+            render_circuit_map(next_race, fullscreen=True)
+        else:
+            wx_col, map_col = st.columns([1, 2.05], gap="medium")
+            with wx_col:
+                render_weather_card(next_race)
+            with map_col:
+                render_circuit_map(next_race)
 
     if next_race:
         next_round = next_race.get("round")
@@ -934,27 +960,6 @@ def match_circuit_key(race: dict[str, Any]) -> str | None:
             if alias and alias in needle:
                 return key
     return None
-
-
-def _open_video_background() -> None:
-    import base64 as _b64
-    with open("assets/media/F1 car fondo.mp4", "rb") as _vf:
-        _video_b64 = _b64.b64encode(_vf.read()).decode("ascii")
-    _video_src = f"data:video/mp4;base64,{_video_b64}"
-    st.markdown(
-        f"""
-        <div class="overview-wrap">
-          <video class="bg-video" autoplay muted loop playsinline preload="auto">
-            <source src="{_video_src}" type="video/mp4">
-          </video>
-          <div class="bg-overlay"></div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-def _close_video_background() -> None:
-    st.markdown("</div>", unsafe_allow_html=True)
 
 
 COMPOUND_COLORS_OPENF1 = {
@@ -1113,7 +1118,11 @@ def _stint_metrics(stints: list[dict[str, Any]], laps: list[dict[str, Any]]) -> 
     return rows
 
 
-def _render_stint_timeline(stints_df: pd.DataFrame, drivers: dict[str, dict[str, Any]]) -> None:
+def _render_stint_timeline(
+    stints_df: pd.DataFrame,
+    drivers: dict[str, dict[str, Any]],
+    height: int | None = None,
+) -> None:
     if stints_df.empty:
         st.info("Sin datos de stints para graficar.")
         return
@@ -1167,7 +1176,7 @@ def _render_stint_timeline(stints_df: pd.DataFrame, drivers: dict[str, dict[str,
     legend_title = "Compuesto" if by_compound else "Stint"
     fig.update_layout(
         barmode="overlay",
-        height=max(160, 56 * len(drivers_in_data) + 90),
+        height=height or max(360, 52 * len(drivers_in_data) + 120),
         margin=dict(l=10, r=10, t=40, b=40),
         paper_bgcolor="#0A0A0A",
         plot_bgcolor="#0A0A0A",
@@ -1186,7 +1195,11 @@ def _render_stint_timeline(stints_df: pd.DataFrame, drivers: dict[str, dict[str,
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 
-def _render_pace_per_stint(stints_df: pd.DataFrame, drivers: dict[str, dict[str, Any]]) -> None:
+def _render_pace_per_stint(
+    stints_df: pd.DataFrame,
+    drivers: dict[str, dict[str, Any]],
+    height: int | None = None,
+) -> None:
     if stints_df.empty:
         return
 
@@ -1247,7 +1260,7 @@ def _render_pace_per_stint(stints_df: pd.DataFrame, drivers: dict[str, dict[str,
         paper_bgcolor="#0A0A0A",
         plot_bgcolor="#0A0A0A",
         font=dict(color="#FFFFFF", family="Chivo, sans-serif"),
-        height=440,
+        height=height or 440,
         margin=dict(l=10, r=10, t=50, b=40),
         legend=dict(
             title=dict(
@@ -1317,6 +1330,7 @@ def _render_history_section(
         st.info("Los pilotos seleccionados no tienen stints en esta sesion.")
         return
 
+    st.markdown("### Ritmo por stint")
     if _compounds_known(stints_df):
         st.caption("Color: compuesto del neumatico (paleta Pirelli).")
     else:
@@ -1325,13 +1339,14 @@ def _render_history_section(
             "el timeline se colorea por numero de stint y la dispersion por piloto (color de equipo)."
         )
 
-    col_a, col_b = st.columns(2)
+    chart_height = max(380, 52 * len(available) + 130)
+    col_a, col_b = st.columns(2, gap="medium")
     with col_a:
-        _render_stint_timeline(stints_df, available)
+        _render_stint_timeline(stints_df, available, height=chart_height)
     with col_b:
-        _render_pace_per_stint(stints_df, available)
+        _render_pace_per_stint(stints_df, available, height=chart_height)
 
-    st.markdown("### Tabla de stints")
+    st.markdown("### Detalle de stints")
     table_rows = []
     for _, s in stints_df.iterrows():
         info = available.get(s["driver_key"], {})
@@ -1350,70 +1365,70 @@ def _render_history_section(
 
 
 def render_history() -> None:
-    _open_video_background()
     render_header(
         "Historial de carreras",
         "Comparativa de stints por circuito · Train 2024 / Eval 2025",
     )
 
-    mode = st.radio(
+    mode = st.segmented_control(
         "Modo de comparacion",
         options=["single", "train_eval"],
+        default="single",
         format_func=lambda m: {
             "single": "Comparar pilotos (mismo año)",
             "train_eval": "Train 2024 vs Eval 2025",
         }[m],
-        horizontal=True,
         label_visibility="collapsed",
-    )
+        key="history_mode",
+    ) or "single"
 
     if mode == "single":
-        col_y, col_d = st.columns([1, 3])
-        with col_y:
-            year = st.selectbox("Temporada", options=[2025, 2024], index=0)
-        try:
-            sessions = _cached_sessions(year)
-            meetings = _cached_meetings(year)
-        except Exception as exc:  # noqa: BLE001
-            st.error(f"No se pudo cargar el historial: {exc}")
-            _close_video_background()
-            return
-        if not sessions:
-            st.warning(f"Sin carreras para {year}.")
-            _close_video_background()
-            return
+        with st.container(border=True):
+            c_year, c_race, c_drivers = st.columns([1, 2.1, 2.4], gap="medium")
+            with c_year:
+                year = st.selectbox("Temporada", options=[2025, 2024], index=0)
 
-        def _session_label(s: dict[str, Any]) -> str:
-            name = meetings.get(s.get("meeting_key"), s.get("circuit_short_name", "Carrera"))
-            return f"R{s.get('round')} · {name} · {str(s.get('date_start', ''))[:10]}"
+            try:
+                sessions = _cached_sessions(year)
+                meetings = _cached_meetings(year)
+            except Exception as exc:  # noqa: BLE001
+                st.error(f"No se pudo cargar el historial: {exc}")
+                return
+            if not sessions:
+                st.warning(f"Sin carreras para {year}.")
+                return
 
-        with col_d:
-            session_idx = st.selectbox(
-                "Carrera",
-                options=range(len(sessions)),
-                format_func=lambda i: _session_label(sessions[i]),
+            def _session_label(s: dict[str, Any]) -> str:
+                name = meetings.get(s.get("meeting_key"), s.get("circuit_short_name", "Carrera"))
+                return f"R{s.get('round')} · {name} · {str(s.get('date_start', ''))[:10]}"
+
+            with c_race:
+                session_idx = st.selectbox(
+                    "Carrera",
+                    options=range(len(sessions)),
+                    format_func=lambda i: _session_label(sessions[i]),
+                )
+
+            session = sessions[session_idx]
+            session_display_name = meetings.get(
+                session.get("meeting_key"), session.get("circuit_short_name", "Carrera")
             )
 
-        session = sessions[session_idx]
-        session_display_name = meetings.get(
-            session.get("meeting_key"), session.get("circuit_short_name", "Carrera")
-        )
+            try:
+                drivers = session_drivers(session)
+            except Exception as exc:  # noqa: BLE001
+                st.error(f"No se pudo cargar pilotos: {exc}")
+                return
 
-        try:
-            drivers = session_drivers(session)
-        except Exception as exc:  # noqa: BLE001
-            st.error(f"No se pudo cargar pilotos: {exc}")
-            _close_video_background()
-            return
-
-        driver_keys_ordered = sorted(drivers, key=lambda k: drivers[k].get("full_name", ""))
-        selected_keys = st.multiselect(
-            "Pilotos a comparar",
-            options=driver_keys_ordered,
-            default=driver_keys_ordered[:3],
-            format_func=lambda k: _driver_label(drivers.get(k, {"full_name": k})),
-            max_selections=6,
-        )
+            driver_keys_ordered = sorted(drivers, key=lambda k: drivers[k].get("full_name", ""))
+            with c_drivers:
+                selected_keys = st.multiselect(
+                    "Pilotos a comparar",
+                    options=driver_keys_ordered,
+                    default=driver_keys_ordered[:3],
+                    format_func=lambda k: _driver_label(drivers.get(k, {"full_name": k})),
+                    max_selections=6,
+                )
 
         if selected_keys:
             _render_history_section(
@@ -1426,54 +1441,53 @@ def render_history() -> None:
             st.info("Selecciona al menos un piloto.")
 
     else:
-        st.caption("Entrenamiento: 2024 · Evaluación: 2025")
-        try:
-            sessions_2024 = _cached_sessions(2024)
-            sessions_2025 = _cached_sessions(2025)
-            meetings_2024 = _cached_meetings(2024)
-            meetings_2025 = _cached_meetings(2025)
-        except Exception as exc:  # noqa: BLE001
-            st.error(f"No se pudo cargar el historial: {exc}")
-            _close_video_background()
-            return
+        with st.container(border=True):
+            c_circuit, c_drivers2 = st.columns([1.4, 2.6], gap="medium")
+            try:
+                sessions_2024 = _cached_sessions(2024)
+                sessions_2025 = _cached_sessions(2025)
+                meetings_2024 = _cached_meetings(2024)
+                meetings_2025 = _cached_meetings(2025)
+            except Exception as exc:  # noqa: BLE001
+                st.error(f"No se pudo cargar el historial: {exc}")
+                return
 
-        circuits = sorted(
-            {s.get("circuit_short_name") for s in sessions_2024 + sessions_2025 if s.get("circuit_short_name")}
-        )
-        circuit = st.selectbox("Circuito", options=circuits)
+            circuits = sorted(
+                {s.get("circuit_short_name") for s in sessions_2024 + sessions_2025 if s.get("circuit_short_name")}
+            )
+            with c_circuit:
+                circuit = st.selectbox("Circuito", options=circuits)
 
-        s24 = next((s for s in sessions_2024 if s.get("circuit_short_name") == circuit), None)
-        s25 = next((s for s in sessions_2025 if s.get("circuit_short_name") == circuit), None)
+            s24 = next((s for s in sessions_2024 if s.get("circuit_short_name") == circuit), None)
+            s25 = next((s for s in sessions_2025 if s.get("circuit_short_name") == circuit), None)
 
-        if not s24 or not s25:
-            st.warning(f"No hay datos para {circuit} en ambos años.")
-            _close_video_background()
-            return
+            if not s24 or not s25:
+                st.warning(f"No hay datos para {circuit} en ambos años.")
+                return
 
-        try:
-            drivers_24 = session_drivers(s24)
-            drivers_25 = session_drivers(s25)
-        except Exception as exc:  # noqa: BLE001
-            st.error(f"No se pudieron cargar pilotos: {exc}")
-            _close_video_background()
-            return
+            try:
+                drivers_24 = session_drivers(s24)
+                drivers_25 = session_drivers(s25)
+            except Exception as exc:  # noqa: BLE001
+                st.error(f"No se pudieron cargar pilotos: {exc}")
+                return
 
-        common = sorted(
-            set(drivers_24.keys()) & set(drivers_25.keys()),
-            key=lambda k: (drivers_24.get(k) or drivers_25.get(k) or {}).get("full_name", ""),
-        )
-        if not common:
-            st.warning("No hay pilotos en comun entre 2024 y 2025 en este circuito.")
-            _close_video_background()
-            return
+            common = sorted(
+                set(drivers_24.keys()) & set(drivers_25.keys()),
+                key=lambda k: (drivers_24.get(k) or drivers_25.get(k) or {}).get("full_name", ""),
+            )
+            if not common:
+                st.warning("No hay pilotos en comun entre 2024 y 2025 en este circuito.")
+                return
 
-        picks = st.multiselect(
-            "Pilotos a comparar",
-            options=common,
-            default=common[: min(4, len(common))],
-            format_func=lambda k: _driver_label(drivers_24.get(k) or drivers_25.get(k) or {"full_name": k}),
-            max_selections=6,
-        )
+            with c_drivers2:
+                picks = st.multiselect(
+                    "Pilotos a comparar",
+                    options=common,
+                    default=common[: min(4, len(common))],
+                    format_func=lambda k: _driver_label(drivers_24.get(k) or drivers_25.get(k) or {"full_name": k}),
+                    max_selections=6,
+                )
 
         if picks:
             name_24 = meetings_2024.get(s24.get("meeting_key"), circuit)
@@ -1496,7 +1510,6 @@ def render_history() -> None:
             st.info("Selecciona al menos un piloto.")
 
     _render_model_content()
-    _close_video_background()
 
 
 def render_season() -> None:
@@ -1856,30 +1869,31 @@ def render_prediction() -> None:
 
     compounds_html = "".join(render_compound_chip(c) for c, _ in best.strategy.stints)
     pit_laps_text = ", ".join(str(l) for l in best.pit_laps) or "—"
+    margin = gap_to_best[1] if len(gap_to_best) > 1 else None
+    sigma_text = f"σ ±{best.sample_std:.2f} s" if best.sample_std else "σ —"
 
-    st.markdown(
-        f"""
-        <div class="strategy-banner">
-            <span class="eyebrow">Estrategia ganadora</span>
-            <div style="color:#FFFFFF;font-size:1.5rem;font-weight:800;margin-top:0.3rem;text-transform:uppercase;">
-                {best.strategy.name}
+    # Estrategia + KPIs en una sola fila para evitar duplicar datos
+    s_col, c1, c2, c3 = st.columns([2.3, 1.1, 1, 1.25], gap="small")
+    with s_col:
+        st.markdown(
+            f"""
+            <div class="strategy-inline">
+              <span class="strategy-inline-tag">Pole position</span>
+              <span class="strategy-inline-name">{best.strategy.name}</span>
+              <span class="strategy-inline-chips">{compounds_html}</span>
             </div>
-            <div style="color:#C0C0C0;font-size:0.9rem;margin-top:0.4rem;">
-                Tiempo proyectado: <b style="color:#FFFFFF">{sim.format_time(best.total_time)}</b> ·
-                Paradas: <b style="color:#FFFFFF">{best.strategy.stops}</b> ·
-                Ventanas de pit: <b style="color:#FFFFFF">{pit_laps_text}</b>
-            </div>
-            <div style="margin-top:0.6rem;">{compounds_html}</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+            """,
+            unsafe_allow_html=True,
+        )
+    c1.metric("Tiempo total", sim.format_time(best.total_time), "estrategia optima")
+    c2.metric("Paradas", best.strategy.stops, f"pit {pit_laps_text}")
+    c3.metric("Margen vs 2°", f"+{margin:.2f} s" if margin is not None else "—", sigma_text)
 
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Tiempo estimado de estrategia", sim.format_time(best.total_time))
-    c2.metric("Numero de paradas", best.strategy.stops)
-    c3.metric("Margen vs 2°", f"+{gap_to_best[1]:.2f} s" if len(gap_to_best) > 1 else "—")
-    c4.metric("Stints", best.strategy.compounds)
+    if len(gap_to_best) > 1 and gap_to_best[1] < 1.0:
+        st.caption(
+            "Margen ajustado (<1 s): la eleccion es sensible a la variabilidad. "
+            "Revisa la desviacion Monte Carlo antes de fijar el plan."
+        )
 
     table_rows = [
         {
@@ -1979,6 +1993,10 @@ def main() -> None:
     _apply_query_navigation()
     section = render_sidebar()
     track_interest(section)
+
+    # El modo pantalla completa pertenece solo a Raceweek
+    if section != "overview":
+        st.session_state["map_fullscreen"] = False
 
     if section == "overview":
         render_overview()

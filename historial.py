@@ -229,25 +229,39 @@ def _jolpica_lap_rows(year: int, round_number: int) -> list[dict[str, Any]]:
 
 def _openf1_sessions(year: int) -> list[dict[str, Any]]:
     rows = openf1.get_sessions(year)
-    return [
-        {
-            "source": "openf1",
-            "session_key": row["session_key"],
-            "round": row.get("meeting_key"),
-            "meeting_key": row.get("meeting_key"),
-            "circuit_short_name": row.get("circuit_short_name", ""),
-            "country_name": row.get("country_name", ""),
-            "date_start": row.get("date_start", ""),
-        }
-        for row in rows
-    ]
+    # OpenF1 no expone la ronda del campeonato: se deriva del orden cronologico
+    # (el meeting_key es un id interno, p. ej. 9472, no la ronda 1..24).
+    rows = sorted(rows, key=lambda r: str(r.get("date_start", "")))
+    sessions = []
+    for index, row in enumerate(rows, start=1):
+        sessions.append(
+            {
+                "source": "openf1",
+                "session_key": row["session_key"],
+                "round": index,
+                "meeting_key": row.get("meeting_key"),
+                "circuit_short_name": row.get("circuit_short_name", ""),
+                "country_name": row.get("country_name", ""),
+                "date_start": row.get("date_start", ""),
+            }
+        )
+    return sessions
+
+
+def _normalize_name(name: str) -> str:
+    """OpenF1 entrega 'Max VERSTAPPEN'; Jolpica 'Max Verstappen'. Se unifica
+    el estilo sin alterar las palabras que ya vienen capitalizadas."""
+    parts = []
+    for word in (name or "").split():
+        parts.append(word.capitalize() if word.isupper() else word)
+    return " ".join(parts)
 
 
 def _openf1_drivers(session: dict[str, Any]) -> dict[str, dict[str, str]]:
     rows = openf1.get_drivers(session["session_key"])
     return {
         str(row["driver_number"]): {
-            "full_name": row.get("full_name", ""),
+            "full_name": _normalize_name(row.get("full_name", "")),
             "team_name": row.get("team_name", ""),
         }
         for row in rows
